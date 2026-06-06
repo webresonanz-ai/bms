@@ -1,6 +1,6 @@
 <template>
     <div class="profile-page">
-        <div class="row g-4">
+        <div v-if="user" class="row g-4">
             <!-- Profile Card -->
             <div class="col-lg-4">
                 <div class="luxury-card text-center">
@@ -140,11 +140,13 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '../stores/auth'
+import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
+const router = useRouter()
 const user = computed(() => authStore.user)
 const editMode = ref(false)
-const defaultAvatar = 'https://i.pravatar.cc/150?img=5'
+const defaultAvatar = 'https://media.istockphoto.com/id/2151669184/vector/vector-flat-illustration-in-grayscale-avatar-user-profile-person-icon-gender-neutral.jpg?s=612x612&w=0&k=20&c=UEa7oHoOL30ynvmJzSCIPrwwopJdfqzBs0q69ezQoM8='
 
 const editForm = reactive({
     name: '',
@@ -165,7 +167,9 @@ watch(user, (newUser) => {
 }, { immediate: true })
 
 onMounted(() => {
-    if (authStore.token && !authStore.user) {
+    if (!authStore.token && !authStore.user) {
+        router.push('/login')
+    } else if (authStore.token && !authStore.user) {
         authStore.fetchProfile()
     }
 })

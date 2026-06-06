@@ -63,15 +63,9 @@
                                 <option v-for="section in attendanceStore.getSections()" :key="section"
                                     :value="section">{{ section }}</option>
                             </select>
-                            <select class="form-select form-select-sm"
-                                style="width: auto; background: rgba(166,123,91,0.08); border-color: rgba(166,123,91,0.3); color: var(--text-primary);"
-                                v-model="statusFilter" @change="applyLocalFilters">
-                                <option value="All">All Status</option>
-                                <option value="Present">Present</option>
-                                <option value="Absent">Absent</option>
-                                <option value="Late">Late</option>
-                                <option value="Excused">Excused</option>
-                            </select>
+                            <input type="date" class="form-control form-control-sm"
+                                style="width: auto; background: rgba(166,123,91,0.08); border-color: rgba(166,123,91,0.3); color: var(--text-primary); border-radius:12px; padding:0.375rem 0.75rem;"
+                                v-model="viewDate" @change="applyLocalFilters" :max="todayDate" />
                         </div>
                     </div>
 
@@ -82,6 +76,7 @@
                                     <th>#</th>
                                     <th>Member</th>
                                     <th>Section</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -92,7 +87,8 @@
                                         <div class="d-flex align-items-center">
                                             <img :src="member.avatar || defaultAvatar" class="avatar-sm me-2" alt="">
                                             <div>
-                                                <div class="fw-semibold luxury-event-title">{{ truncate(member.name, 25)
+                                                <div class="fw-semibold luxury-event-title">{{
+                                                    truncate(getDisplayName(member), 25)
                                                     }}</div>
                                                 <small class="luxury-text-muted">{{ truncate(member.email, 35)
                                                     }}</small>
@@ -100,9 +96,14 @@
                                         </div>
                                     </td>
                                     <td>{{ member.section || member.section_name || '-' }}</td>
+                                    <td>
+                                        <span
+                                            :class="['badge', 'rounded-pill', getStatusBadgeClass(getMemberStatusForDate(member))]">{{
+                                                getMemberStatusForDate(member) }}</span>
+                                    </td>
                                 </tr>
                                 <tr v-if="!attendanceStore.filteredParticipants.length">
-                                    <td colspan="3" class="text-center luxury-text-muted py-4">No members found for this
+                                    <td colspan="4" class="text-center luxury-text-muted py-4">No members found for this
                                         event.</td>
                                 </tr>
                             </tbody>
@@ -113,7 +114,7 @@
                         <small class="luxury-text-muted">Showing {{ attendanceStore.filteredParticipants.length }} of {{
                             attendanceStore.participantList.length }} members</small>
                         <div class="d-flex gap-2">
-                            <button class="btn btn-earth-outline btn-sm" @click="attendanceStore.resetFilters()">
+                            <button class="btn btn-earth-outline btn-sm" @click="resetFilters">
                                 <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
                             </button>
                             <button v-if="isMusicDirector || isSectionLeader"
@@ -159,7 +160,8 @@
 
                 <div class="mb-3">
                     <label class="form-label">Search Member</label>
-                    <input type="text" class="form-control" v-model="searchMember" placeholder="Type member name...">
+                    <input type="text" class="form-control" v-model="searchMember"
+                        placeholder="Type nickname or member name...">
                 </div>
 
                 <div class="table-responsive" style="max-height: 50vh; overflow-y: auto; overflow-x: auto;">
@@ -176,7 +178,9 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <img :src="member.avatar || defaultAvatar" class="avatar-xs me-2" alt="">
-                                        <span class="fw-semibold">{{ member.name }}</span>
+                                        <div>
+                                            <span class="fw-semibold">{{ getDisplayName(member) }}</span>
+                                        </div>
                                     </div>
                                 </td>
                                 <td>{{ member.section || member.section_name || '-' }}</td>
@@ -222,7 +226,7 @@
                     <div class="d-flex align-items-center mb-3">
                         <img :src="selectedMember.avatar || defaultAvatar" class="avatar-sm me-3" alt="">
                         <div>
-                            <div class="fw-semibold">{{ selectedMember.name }}</div>
+                            <div class="fw-semibold">{{ getDisplayName(selectedMember) }}</div>
                             <small class="luxury-text-muted">{{ selectedMember.section || selectedMember.section_name ||
                                 '' }} &middot; {{ selectedMember.role || '' }}</small>
                         </div>
@@ -272,7 +276,6 @@ const searchMember = ref('')
 const submitting = ref(false)
 
 const sectionFilter = ref('All')
-const statusFilter = ref('All')
 
 const userRole = computed(() => authStore.user?.role || '')
 const isMusicDirector = computed(() => userRole.value === 'Music Director')
@@ -287,19 +290,31 @@ const recordForm = ref({
 const takeList = ref({})
 const selectedAttendanceDate = ref(formatDateInputValue(new Date()))
 const todayDate = ref(formatDateInputValue(new Date()))
+const viewDate = ref(formatDateInputValue(new Date()))
 
-const defaultAvatar = 'https://i.pravatar.cc/150?img=5'
+const defaultAvatar = 'https://media.istockphoto.com/id/2151669184/vector/vector-flat-illustration-in-grayscale-avatar-user-profile-person-icon-gender-neutral.jpg?s=612x612&w=0&k=20&c=UEa7oHoOL30ynvmJzSCIPrwwopJdfqzBs0q69ezQoM8='
 
 const selectedEvent = computed(() => {
     return eventsStore.events.find(e => e.id === selectedEventId.value) || attendanceStore.currentEvent
 })
 
 const filteredTakeList = computed(() => {
-    const list = attendanceStore.filteredParticipants
+    const list = attendanceStore.participantList
     if (!searchMember.value) return list
     const q = searchMember.value.toLowerCase()
-    return list.filter(p => (p.name || '').toLowerCase().includes(q))
+    return list.filter(p => {
+        const name = (p.name || '').toLowerCase()
+        const nickname = ((p.nickname || p.nick) || '').toLowerCase()
+        return name.includes(q) || nickname.includes(q)
+    })
 })
+
+function getDisplayName(member) {
+    const name = member?.name || ''
+    const nickname = member?.nickname || member?.nick || ''
+    if (nickname) return `(${nickname}) ${name}`
+    return name || '-'
+}
 
 function truncate(value, max) {
     if (!value) return '-'
@@ -368,7 +383,7 @@ function getAttendanceStatus(member) {
 
 async function onEventChange() {
     sectionFilter.value = 'All'
-    statusFilter.value = 'All'
+    viewDate.value = todayDate.value
     if (!selectedEventId.value) {
         attendanceStore.reset()
         return
@@ -383,8 +398,35 @@ async function onEventChange() {
 
 function applyLocalFilters() {
     attendanceStore.selectedSection = sectionFilter.value
-    attendanceStore.selectedStatus = statusFilter.value
+    attendanceStore.selectedStatus = 'All'
     attendanceStore.applyFilters()
+}
+
+function resetFilters() {
+    attendanceStore.resetFilters()
+    sectionFilter.value = 'All'
+    viewDate.value = todayDate.value
+}
+
+function isRecordOnDate(record, date) {
+    const recordedAt = record?.recorded_at
+    if (!recordedAt) return false
+    const recorded = new Date(recordedAt)
+    if (Number.isNaN(recorded.getTime())) return false
+    const compareDate = date instanceof Date ? date : new Date(date)
+    return recorded.getFullYear() === compareDate.getFullYear() && recorded.getMonth() === compareDate.getMonth() && recorded.getDate() === compareDate.getDate()
+}
+
+function getMemberStatusForDate(member) {
+    const selectedDate = getDateFromInput(viewDate.value)
+    if (!selectedDate) return 'Absent'
+    const id = member.member_id || member.id
+    const found = attendanceStore.attendanceRecords.find(r => (r.member_id || r.id) === id && isRecordOnDate(r, selectedDate) && r.status === 'Present')
+    return found ? 'Present' : 'Absent'
+}
+
+function getStatusBadgeClass(status) {
+    return status === 'Present' ? 'bg-success' : 'bg-danger'
 }
 
 function openTakeAttendanceModal() {

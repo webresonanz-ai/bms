@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 CREATE TABLE IF NOT EXISTS `members` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
+  `nickname` varchar(255) DEFAULT NULL,
   `email` varchar(255) NOT NULL,
   `phone` varchar(50) DEFAULT NULL,
   `role` varchar(100) NOT NULL DEFAULT 'Member',
@@ -29,6 +30,12 @@ CREATE TABLE IF NOT EXISTS `members` (
   `status` enum('active','inactive') NOT NULL DEFAULT 'active',
   `performances` int(11) NOT NULL DEFAULT 0,
   `avatar` varchar(500) DEFAULT NULL,
+  `stage_name` varchar(255) DEFAULT NULL,
+  `birth_place` varchar(255) DEFAULT NULL,
+  `birth_date` date DEFAULT NULL,
+  `domicile` varchar(255) DEFAULT NULL,
+  `year_join` int(11) DEFAULT NULL,
+  `field_of_work` varchar(255) DEFAULT NULL,
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -51,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `events` (
 
 -- Seed initial user
 INSERT INTO `users` (`name`, `email`, `password`, `role`, `avatar`, `phone`, `location`, `specialization`, `bio`, `join_date`, `achievements`) VALUES
-('Alexandra Williams', 'alexandra.w@bms.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Music Director', 'https://i.pravatar.cc/150?img=5', '+1 234-567-8900', 'New York, USA', 'Choral Conducting', 'Passionate music director with 15 years of experience in choral conducting.', '2023-01-15', '[\"International Choir Competition Gold Medalist 2025\",\"Best Conductor Award 2024\",\"Published \"Modern Choral Techniques\" 2023\"]');
+('Alexandra Williams', 'alexandra.w@bms.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Music Director', 'https://media.istockphoto.com/id/2151669184/vector/vector-flat-illustration-in-grayscale-avatar-user-profile-person-icon-gender-neutral.jpg?s=612x612&w=0&k=20&c=UEa7oHoOL30ynvmJzSCIPrwwopJdfqzBs0q69ezQoM8=', '+1 234-567-8900', 'New York, USA', 'Choral Conducting', 'Passionate music director with 15 years of experience in choral conducting.', '2023-01-15', '[\"International Choir Competition Gold Medalist 2025\",\"Best Conductor Award 2024\",\"Published \"Modern Choral Techniques\" 2023\"]');
 
 -- Seed initial members
 INSERT INTO `members` (`name`, `email`, `phone`, `role`, `section`, `join_date`, `status`, `performances`, `avatar`) VALUES

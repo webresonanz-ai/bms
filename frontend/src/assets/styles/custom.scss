@@ -323,3 +323,41 @@ body.sidebar-open {
     align-items: center;
     justify-content: center;
 }
+
+// Input Placeholder Styles - Lighter and More Readable
+input::placeholder,
+textarea::placeholder,
+select::placeholder,
+.form-control::placeholder,
+.form-control::-webkit-input-placeholder {
+  color: #A89888 !important;
+  opacity: 1 !important;
+}
+
+.form-control::-moz-placeholder {
+  color: #A89888 !important;
+  opacity: 1 !important;
+}
+
+.form-control:-ms-input-placeholder {
+  color: #A89888 !important;
+}
+
+// Bootstrap form control placeholder
+::-webkit-input-placeholder {
+  color: #A89888 !important;
+  opacity: 1 !important;
+}
+
+::-moz-placeholder {
+  color: #A89888 !important;
+  opacity: 1 !important;
+}
+
+:-ms-input-placeholder {
+  color: #A89888 !important;
+}
+
+:-moz-placeholder {
+  color: #A89888 !important;
+}

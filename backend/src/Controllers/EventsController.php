@@ -37,10 +37,10 @@ class EventsController
     public function store(): void
     {
         $data = json_decode(file_get_contents('php://input'), true);
-        
+
         $id = $this->eventModel->create($data);
         $event = $this->eventModel->find($id);
-        
+
         $this->jsonResponse($this->formatEvent($event), 201);
     }
 
@@ -53,7 +53,7 @@ class EventsController
     public function update(int $id): void
     {
         $data = json_decode(file_get_contents('php://input'), true);
-        
+
         $event = $this->eventModel->find($id);
         if (!$event) {
             $this->jsonResponse(['error' => 'Event not found'], 404);
@@ -78,6 +78,7 @@ class EventsController
                 'id' => (int) $member['member_id'],
                 'member_id' => (int) $member['member_id'],
                 'name' => $member['name'],
+                'nickname' => $member['nickname'],
                 'email' => $member['email'],
                 'role' => $member['role'],
                 'section' => $member['section'],

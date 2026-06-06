@@ -106,7 +106,7 @@ const leadershipTeam = [
         name: 'Alexandra Williams',
         role: 'Music Director',
         bio: '15+ years of choral conducting experience',
-        avatar: 'https://i.pravatar.cc/150?img=5'
+        avatar: 'https://media.istockphoto.com/id/2151669184/vector/vector-flat-illustration-in-grayscale-avatar-user-profile-person-icon-gender-neutral.jpg?s=612x612&w=0&k=20&c=UEa7oHoOL30ynvmJzSCIPrwwopJdfqzBs0q69ezQoM8='
     },
     {
         id: 2,
@@ -237,11 +237,11 @@ const achievements = [
         height: 150px;
         margin-top: 2rem;
     }
-    
+
     .stats-row {
         flex-wrap: wrap;
     }
-    
+
     .stat {
         flex: 1 1 30%;
     }

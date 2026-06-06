@@ -21,8 +21,10 @@
                     </ul>
                 </div>
 
-                <div class="dropdown ms-3">
-                    <button v-if="user" class="btn btn-link text-white dropdown-toggle d-flex align-items-center user-dropdown"
+                <div class="dropdown ms-3" ref="userDropdownRef" @mouseenter="clearAutoHideTimeout"
+                    @mouseleave="startAutoHideTimeout">
+                    <button v-if="user"
+                        class="btn btn-link text-white dropdown-toggle d-flex align-items-center user-dropdown"
                         data-bs-toggle="dropdown">
                         <img :src="user.avatar || defaultAvatar" :alt="user.name" class="nav-avatar me-2">
                         <span class="d-none d-md-inline luxury-event-title">{{ user.name }}</span>
@@ -31,7 +33,8 @@
                         <i class="bi bi-person-circle fs-4"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><router-link to="/profile" class="dropdown-item luxury-text-muted">Profile</router-link></li>
+                        <li><router-link to="/profile" class="dropdown-item luxury-text-muted">Profile</router-link>
+                        </li>
                         <li><a class="dropdown-item luxury-text-muted" href="#">Settings</a></li>
                         <li>
                             <hr class="dropdown-divider">
@@ -46,13 +49,15 @@
 
 <script setup>
 import { useAuthStore } from '../../stores/auth'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
 const router = useRouter()
 const user = computed(() => authStore.user)
-const defaultAvatar = 'https://i.pravatar.cc/150?img=5'
+const defaultAvatar = 'https://media.istockphoto.com/id/2151669184/vector/vector-flat-illustration-in-grayscale-avatar-user-profile-person-icon-gender-neutral.jpg?s=612x612&w=0&k=20&c=UEa7oHoOL30ynvmJzSCIPrwwopJdfqzBs0q69ezQoM8='
+const autoHideTimeout = ref(null)
+const userDropdownRef = ref(null)
 
 const toggleSidebar = () => {
     document.body.classList.toggle('sidebar-open')
@@ -65,6 +70,24 @@ const goToLogin = () => {
 const logout = () => {
     authStore.logout()
     router.push('/login')
+}
+
+const startAutoHideTimeout = () => {
+    autoHideTimeout.value = setTimeout(() => {
+        if (userDropdownRef.value) {
+            const dropdownMenu = userDropdownRef.value.querySelector('.dropdown-menu')
+            if (dropdownMenu && dropdownMenu.classList.contains('show')) {
+                dropdownMenu.classList.remove('show')
+            }
+        }
+    }, 1000)
+}
+
+const clearAutoHideTimeout = () => {
+    if (autoHideTimeout.value) {
+        clearTimeout(autoHideTimeout.value)
+        autoHideTimeout.value = null
+    }
 }
 </script>
 
@@ -146,5 +169,14 @@ const logout = () => {
 
 .user-dropdown:hover {
     color: var(--gold-text);
+}
+
+.dropdown-menu {
+    transition: opacity 0.3s ease;
+}
+
+.dropdown-menu:not(.show) {
+    opacity: 0;
+    pointer-events: none;
 }
 </style>

@@ -11,7 +11,8 @@
                         <small class="luxury-text-muted">Management System</small>
                     </div>
                 </div>
-                <button class="btn btn-sm btn-earth-outline sidebar-collapse-btn d-none d-md-block" @click="toggleCollapse" title="Collapse sidebar">
+                <button class="btn btn-sm btn-earth-outline sidebar-collapse-btn d-none d-md-block"
+                    @click="toggleCollapse" title="Collapse sidebar">
                     <i class="bi" :class="isCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
                 </button>
             </div>
@@ -68,7 +69,7 @@ import { useSidebarCollapse } from '../../composables/useSidebarCollapse'
 
 const authStore = useAuthStore()
 const user = computed(() => authStore.user)
-const defaultAvatar = 'https://i.pravatar.cc/150?img=5'
+const defaultAvatar = 'https://media.istockphoto.com/id/2151669184/vector/vector-flat-illustration-in-grayscale-avatar-user-profile-person-icon-gender-neutral.jpg?s=612x612&w=0&k=20&c=UEa7oHoOL30ynvmJzSCIPrwwopJdfqzBs0q69ezQoM8='
 
 const { isCollapsed, toggleCollapse } = useSidebarCollapse()
 

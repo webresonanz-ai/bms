@@ -46,7 +46,7 @@ class EventMember extends Model
     public function getByEventId(int $eventId): array
     {
         $stmt = $this->db->prepare("
-            SELECT em.*, m.id as member_id, m.name, m.email, m.role, m.section, m.avatar, m.status as member_status
+            SELECT em.*, m.id as member_id, m.name, m.nickname, m.email, m.role, m.section, m.avatar, m.status as member_status
             FROM {$this->table} em
             JOIN members m ON m.id = em.member_id
             WHERE em.event_id = ?

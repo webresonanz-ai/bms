@@ -82,7 +82,7 @@
                         <button class="btn btn-sm btn-outline-info me-2" @click="viewMemberDetails(member)">
                             <i class="bi bi-eye"></i> View
                         </button>
-                        <button class="btn btn-sm btn-outline-warning me-2">
+                        <button class="btn btn-sm btn-outline-warning me-2" @click="editMember(member)">
                             <i class="bi bi-pencil"></i> Edit
                         </button>
                         <button class="btn btn-sm btn-outline-danger" @click="deactivateMember(member.id)">
@@ -131,22 +131,230 @@
                 </form>
             </div>
         </div>
+
+        <!-- View Member Modal -->
+        <div v-if="showViewModal" class="modal-overlay" @click.self="showViewModal = false">
+            <div class="modal-content luxury-card" style="max-width: 600px;">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <img :src="viewingMember.avatar" :alt="viewingMember.name" class="member-avatar-lg">
+                        <div>
+                            <h4 class="fw-bold mb-1">{{ viewingMember.name }}</h4>
+                            <p class="text-white-50 mb-0">{{ viewingMember.role }}</p>
+                            <span class="badge mt-2" :class="viewingMember.status === 'active' ? 'bg-success' : 'bg-secondary'">
+                                {{ viewingMember.status }}
+                            </span>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-outline-light" @click="showViewModal = false">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="detail-card">
+                            <small class="text-white-50">Nickname</small>
+                            <p class="mb-0 fw-semibold">{{ viewingMember.nickname || '-' }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card">
+                            <small class="text-white-50">Stage Name</small>
+                            <p class="mb-0 fw-semibold">{{ viewingMember.stage_name || '-' }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card">
+                            <small class="text-white-50">Email</small>
+                            <p class="mb-0 fw-semibold">{{ viewingMember.email }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card">
+                            <small class="text-white-50">Phone</small>
+                            <p class="mb-0 fw-semibold">{{ viewingMember.phone || '-' }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card">
+                            <small class="text-white-50">Birth Place</small>
+                            <p class="mb-0 fw-semibold">{{ viewingMember.birth_place || '-' }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card">
+                            <small class="text-white-50">Birth Date</small>
+                            <p class="mb-0 fw-semibold">{{ formatDate(viewingMember.birth_date) }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card">
+                            <small class="text-white-50">Domicile</small>
+                            <p class="mb-0 fw-semibold">{{ viewingMember.domicile || '-' }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card">
+                            <small class="text-white-50">Year Join</small>
+                            <p class="mb-0 fw-semibold">{{ formatDate(viewingMember.year_join) }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card">
+                            <small class="text-white-50">Field of Work</small>
+                            <p class="mb-0 fw-semibold">{{ viewingMember.field_of_work || '-' }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card">
+                            <small class="text-white-50">Section</small>
+                            <p class="mb-0 fw-semibold">{{ viewingMember.section }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card">
+                            <small class="text-white-50">Join Date</small>
+                            <p class="mb-0 fw-semibold">{{ formatDate(viewingMember.joinDate) }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-card">
+                            <small class="text-white-50">Performances</small>
+                            <p class="mb-0 fw-semibold">{{ viewingMember.performances }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button class="btn btn-gradient flex-grow-1" @click="editMember(viewingMember)">
+                        <i class="bi bi-pencil me-2"></i>Edit Member
+                    </button>
+                    <button class="btn btn-outline-light" @click="showViewModal = false">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Member Modal -->
+        <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal = false">
+            <div class="modal-content luxury-card" style="max-width: 700px;">
+                <h4 class="fw-bold mb-4">Edit Member</h4>
+                <form @submit.prevent="saveMember">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Name *</label>
+                            <input type="text" class="form-control" v-model="editingMember.name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nickname</label>
+                            <input type="text" class="form-control" v-model="editingMember.nickname">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" v-model="editingMember.email" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Stage Name</label>
+                            <input type="text" class="form-control" v-model="editingMember.stage_name">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Birth Place</label>
+                            <input type="text" class="form-control" v-model="editingMember.birth_place">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Birth Date</label>
+                            <input type="date" class="form-control" v-model="editingMember.birth_date">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Domicile</label>
+                            <input type="text" class="form-control" v-model="editingMember.domicile">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Year Join</label>
+                            <input type="date" class="form-control" v-model="editingMember.year_join">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Field of Work</label>
+                            <input type="text" class="form-control" v-model="editingMember.field_of_work">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Role *</label>
+                            <input type="text" class="form-control" v-model="editingMember.role" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Section *</label>
+                            <select class="form-select" v-model="editingMember.section" required>
+                                <option value="Soprano">Soprano</option>
+                                <option value="Alto">Alto</option>
+                                <option value="Tenor">Tenor</option>
+                                <option value="Bass">Bass</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Join Date</label>
+                            <input type="date" class="form-control" v-model="editingMember.joinDate">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" v-model="editingMember.status">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Performances</label>
+                            <input type="number" class="form-control" v-model="editingMember.performances" min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" v-model="editingMember.phone">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Avatar URL</label>
+                            <input type="url" class="form-control" v-model="editingMember.avatar">
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-gradient flex-grow-1">
+                            <i class="bi bi-check-lg me-2"></i>Save Changes
+                        </button>
+                        <button type="button" class="btn btn-outline-light" @click="showEditModal = false">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useMembersStore } from '../stores/members'
+import { api } from '../services/api'
 
 const membersStore = useMembersStore()
 const showAddModal = ref(false)
+const showViewModal = ref(false)
+const showEditModal = ref(false)
 const selectedSection = ref(null)
+const viewingMember = ref({})
+const editingMember = ref({})
 const newMember = ref({
     name: '',
+    nickname: '',
+    email: '',
+    fullname: '',
+    stage_name: '',
+    birth_place: '',
+    birth_date: '',
+    domicile: '',
+    phone: '',
+    year_join: '',
+    field_of_work: '',
     role: '',
     section: 'Soprano',
-    email: '',
-    phone: '',
+    joinDate: new Date().toISOString().split('T')[0],
+    status: 'active',
+    performances: 0,
     avatar: 'https://i.pravatar.cc/150?img=' + Math.floor(Math.random() * 70)
 })
 
@@ -161,24 +369,27 @@ onMounted(() => {
     membersStore.fetchMembers()
 })
 
-function formatDate(date) {
-    return new Date(date).toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric'
-    })
-}
-
 async function addNewMember() {
     try {
         await membersStore.addMember({ ...newMember.value })
         showAddModal.value = false
         newMember.value = {
             name: '',
+            nickname: '',
+            email: '',
+            fullname: '',
+            stage_name: '',
+            birth_place: '',
+            birth_date: '',
+            domicile: '',
+            phone: '',
+            year_join: '',
+            field_of_work: '',
             role: '',
             section: 'Soprano',
-            email: '',
-            phone: '',
+            joinDate: new Date().toISOString().split('T')[0],
+            status: 'active',
+            performances: 0,
             avatar: 'https://i.pravatar.cc/150?img=' + Math.floor(Math.random() * 70)
         }
     } catch (error) {
@@ -197,7 +408,38 @@ async function deactivateMember(id) {
 }
 
 function viewMemberDetails(member) {
-    alert(`Viewing details for ${member.name}`)
+    viewingMember.value = { ...member }
+    showViewModal.value = true
+}
+
+function editMember(member) {
+    showViewModal.value = false
+    editingMember.value = { ...member }
+    showEditModal.value = true
+}
+
+async function saveMember() {
+    try {
+        const updateData = { ...editingMember.value }
+        if ('joinDate' in updateData) {
+            updateData.join_date = updateData.joinDate
+            delete updateData.joinDate
+        }
+        await api.updateMember(updateData.id, updateData)
+        showEditModal.value = false
+        await membersStore.fetchMembers()
+    } catch (error) {
+        alert('Failed to update member: ' + error.message)
+    }
+}
+
+function formatDate(date) {
+    if (!date) return '-'
+    return new Date(date).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+    })
 }
 </script>
 
@@ -300,5 +542,25 @@ function viewMemberDetails(member) {
     border-color: var(--primary-color);
     color: white;
     box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.member-avatar-lg {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--primary-color);
+    object-fit: cover;
+}
+
+.detail-card {
+    background: rgba(102, 126, 234, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+.detail-card p {
+    color: var(--text-primary);
+    margin-top: 0.25rem;
 }
 </style>

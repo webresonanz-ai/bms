@@ -64,3 +64,13 @@ INSERT INTO `events` (`title`, `date`, `time`, `location`, `type`, `status`, `pa
 ('Annual Concert 2026', '2026-06-15', '19:00:00', 'Grand Symphony Hall', 'concert', 'upcoming', 45),
 ('Rehearsal Session', '2026-06-10', '18:00:00', 'Studio A', 'rehearsal', 'upcoming', 30),
 ('Community Performance', '2026-06-20', '16:00:00', 'City Park Amphitheater', 'performance', 'upcoming', 25);
+
+-- Update members table with new columns
+ALTER TABLE `members`
+ADD COLUMN `nickname` varchar(255) DEFAULT NULL AFTER `name`,
+ADD COLUMN `stage_name` varchar(255) DEFAULT NULL AFTER `fullname`,
+ADD COLUMN `birth_place` varchar(255) DEFAULT NULL AFTER `voice_type`,
+ADD COLUMN `birth_date` date DEFAULT NULL AFTER `birth_place`,
+ADD COLUMN `domicile` varchar(255) DEFAULT NULL AFTER `birth_date`,
+ADD COLUMN `year_join` date DEFAULT NULL AFTER `phone`,
+ADD COLUMN `field_of_work` varchar(255) DEFAULT NULL AFTER `year_join`;

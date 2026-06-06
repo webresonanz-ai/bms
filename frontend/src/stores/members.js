@@ -71,6 +71,19 @@ export const useMembersStore = defineStore('members', () => {
     }
   }
 
+  async function updateMember(id, data) {
+    try {
+      const response = await api.updateMember(id, data)
+      const index = members.value.findIndex(m => m.id === id)
+      if (index !== -1) {
+        members.value[index] = response
+      }
+    } catch (error) {
+      console.error('Failed to update member:', error)
+      throw error
+    }
+  }
+
   async function deleteMember(id) {
     try {
       await api.deleteMember(id)

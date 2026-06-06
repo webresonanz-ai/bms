@@ -62,6 +62,11 @@ export const api = {
     body: JSON.stringify({ status })
   }),
 
+  updateMember: (id, data) => apiFetch(`/members/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }),
+
   deleteMember: (id) => apiFetch(`/members/${id}`, {
     method: 'DELETE'
   }),

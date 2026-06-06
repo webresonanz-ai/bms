@@ -4,7 +4,7 @@
             <!-- Profile Card -->
             <div class="col-lg-4">
                 <div class="luxury-card text-center">
-                    <img :src="user.avatar" :alt="user.name" class="profile-avatar mb-3">
+                    <img :src="user.avatar || defaultAvatar" :alt="user.name" class="profile-avatar mb-3">
                     <h3 class="fw-bold mb-1">{{ user.name }}</h3>
                     <p class="text-primary fw-semibold mb-3">{{ user.role }}</p>
 
@@ -144,6 +144,7 @@ import { useAuthStore } from '../stores/auth'
 const authStore = useAuthStore()
 const user = computed(() => authStore.user)
 const editMode = ref(false)
+const defaultAvatar = 'https://i.pravatar.cc/150?img=5'
 
 const editForm = reactive({
     name: '',
@@ -193,14 +194,14 @@ async function saveProfile() {
     height: 120px;
     border-radius: 50%;
     border: 4px solid var(--primary-color);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 25px rgba(166, 123, 91, 0.3);
 }
 
 .info-item {
     display: flex;
     align-items: center;
     padding: 0.75rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(166, 123, 91, 0.15);
 }
 
 .info-item:last-child {
@@ -227,7 +228,7 @@ async function saveProfile() {
     display: flex;
     align-items: center;
     padding: 1rem;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(166, 123, 91, 0.05);
     border-radius: 12px;
 }
 
@@ -236,21 +237,35 @@ async function saveProfile() {
 }
 
 .form-control {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    border-radius: 8px;
+    background: rgba(166, 123, 91, 0.08);
+    border: 1px solid rgba(166, 123, 91, 0.3);
+    color: var(--text-primary);
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
 }
 
 .form-control:focus {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(166, 123, 91, 0.12);
     border-color: var(--primary-color);
-    color: white;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.25rem rgba(166, 123, 91, 0.25);
 }
 
 .form-label {
     color: var(--text-secondary);
     font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.luxury-heading {
+    color: var(--text-primary);
+}
+
+.luxury-text-muted {
+    color: var(--text-secondary);
+}
+
+.luxury-event-title {
+    color: var(--text-primary);
 }
 </style>

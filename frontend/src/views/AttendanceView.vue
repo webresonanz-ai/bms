@@ -4,11 +4,11 @@
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h2 class="fw-bold mb-2">
-                            <i class="bi bi-check2-circle me-2"></i>
+                        <h2 class="fw-bold mb-2 luxury-heading">
+                            <i class="bi bi-check2-circle me-2 text-gold"></i>
                             Attendance Management
                         </h2>
-                        <p class="text-white-50">Track member attendance for each event</p>
+                        <p class="luxury-subtitle">Track member attendance for each event</p>
                     </div>
                 </div>
             </div>
@@ -16,7 +16,7 @@
 
         <div class="row g-4">
             <div class="col-lg-12">
-                <div class="luxury-card">
+                <div class="luxury-card attendance-card">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-6">
                             <label class="form-label">Select Event</label>
@@ -28,7 +28,7 @@
                             </select>
                         </div>
                         <div class="col-md-3" v-if="selectedEventId">
-                            <button class="btn btn-gradient" @click="openTakeAttendanceModal">
+                            <button class="btn btn-gradient luxury-btn" @click="openTakeAttendanceModal">
                                 <i class="bi bi-clipboard-check me-2"></i>
                                 Take Attendance
                             </button>
@@ -40,18 +40,18 @@
 
         <div class="row g-4 mt-1" v-if="selectedEventId">
             <div class="col-12">
-                <div class="luxury-card">
+                <div class="luxury-card attendance-table-card">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-                        <h5 class="fw-bold mb-0">
-                            <i class="bi bi-people me-2"></i>
+                        <h5 class="fw-bold mb-0 luxury-subheading">
+                            <i class="bi bi-people me-2 text-gold"></i>
                             Members - {{ selectedEvent?.title }}
                         </h5>
                         <div class="d-flex gap-2">
-                            <select class="form-select form-select-sm" style="width: auto; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white;" v-model="sectionFilter" @change="applyLocalFilters">
+                            <select class="form-select form-select-sm" style="width: auto; background: rgba(166,123,91,0.08); border-color: rgba(166,123,91,0.3); color: var(--text-primary);" v-model="sectionFilter" @change="applyLocalFilters">
                                 <option value="All">All Sections</option>
                                 <option v-for="section in attendanceStore.getSections()" :key="section" :value="section">{{ section }}</option>
                             </select>
-                            <select class="form-select form-select-sm" style="width: auto; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white;" v-model="statusFilter" @change="applyLocalFilters">
+                            <select class="form-select form-select-sm" style="width: auto; background: rgba(166,123,91,0.08); border-color: rgba(166,123,91,0.3); color: var(--text-primary);" v-model="statusFilter" @change="applyLocalFilters">
                                 <option value="All">All Status</option>
                                 <option value="Present">Present</option>
                                 <option value="Absent">Absent</option>
@@ -62,7 +62,7 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table table-dark table-hover align-middle">
+                        <table class="table table-dark table-hover align-middle luxury-table">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -81,39 +81,39 @@
                                         <div class="d-flex align-items-center">
                                             <img :src="member.avatar || defaultAvatar" class="avatar-sm me-2" alt="">
                                             <div>
-                                                <div class="fw-semibold">{{ member.name }}</div>
-                                                <small class="text-white-50">{{ member.email }}</small>
+                                                <div class="fw-semibold luxury-event-title">{{ member.name }}</div>
+                                                <small class="luxury-text-muted">{{ member.email }}</small>
                                             </div>
                                         </div>
                                     </td>
                                     <td>{{ member.section || member.section_name || '-' }}</td>
                                     <td>{{ member.role || '-' }}</td>
                                     <td>
-                                        <span class="badge" :class="attendanceBadgeClass(member)">
+                                        <span class="badge luxury-badge" :class="attendanceBadgeClass(member)">
                                             {{ getAttendanceStatus(member) }}
                                         </span>
                                     </td>
                                     <td>{{ member.attendance?.notes || '-' }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-light me-1" @click="openRecordModal(member)">
+                                        <button class="btn btn-sm btn-earth-outline me-1" @click="openRecordModal(member)">
                                             <i class="bi bi-pencil"></i> Record
                                         </button>
                                     </td>
                                 </tr>
                                 <tr v-if="!attendanceStore.filteredParticipants.length">
-                                    <td colspan="7" class="text-center text-white-50 py-4">No members found for this event.</td>
+                                    <td colspan="7" class="text-center luxury-text-muted py-4">No members found for this event.</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                        <small class="text-white-50">Showing {{ attendanceStore.filteredParticipants.length }} of {{ attendanceStore.participantList.length }} members</small>
+                        <small class="luxury-text-muted">Showing {{ attendanceStore.filteredParticipants.length }} of {{ attendanceStore.participantList.length }} members</small>
                         <div class="d-flex gap-2">
-                            <button class="btn btn-outline-light btn-sm" @click="attendanceStore.resetFilters()">
+                            <button class="btn btn-earth-outline btn-sm" @click="attendanceStore.resetFilters()">
                                 <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
                             </button>
-                            <button class="btn btn-gradient btn-sm" @click="openTakeAttendanceModal">
+                            <button class="btn btn-gradient btn-sm luxury-btn-sm" @click="openTakeAttendanceModal">
                                 <i class="bi bi-clipboard-check me-1"></i> Take Attendance
                             </button>
                         </div>
@@ -125,8 +125,8 @@
         <div class="row g-4 mt-1" v-if="!selectedEventId">
             <div class="col-12">
                 <div class="luxury-card text-center py-5">
-                    <i class="bi bi-calendar-event fs-1 text-white-50 mb-3"></i>
-                    <p class="text-white-50 mb-0">Please select an event above to view and manage attendance records.</p>
+                    <i class="bi bi-calendar-event fs-1 luxury-text-muted mb-3"></i>
+                    <p class="luxury-text-muted mb-0">Please select an event above to view and manage attendance records.</p>
                 </div>
             </div>
         </div>
@@ -138,7 +138,7 @@
                     <i class="bi bi-clipboard-check me-2"></i>
                     Take Attendance
                 </h4>
-                <p class="text-white-50 mb-4">Mark attendance for all members in <strong>{{ selectedEvent?.title }}</strong></p>
+                <p class="luxury-text-muted mb-4">Mark attendance for all members in <strong>{{ selectedEvent?.title }}</strong></p>
 
                 <div class="mb-3">
                     <label class="form-label">Search Member</label>
@@ -179,9 +179,9 @@
                                     </div>
                                 </td>
                             </tr>
-                            <tr v-if="!filteredTakeList.length">
-                                <td colspan="3" class="text-center text-white-50 py-3">No members match your search.</td>
-                            </tr>
+<tr v-if="!filteredTakeList.length">
+                                    <td colspan="3" class="text-center luxury-text-muted py-3">No members match your search.</td>
+                                </tr>
                         </tbody>
                     </table>
                 </div>
@@ -208,7 +208,7 @@
                         <img :src="selectedMember.avatar || defaultAvatar" class="avatar-sm me-3" alt="">
                         <div>
                             <div class="fw-semibold">{{ selectedMember.name }}</div>
-                            <small class="text-white-50">{{ selectedMember.section || selectedMember.section_name || '' }} &middot; {{ selectedMember.role || '' }}</small>
+                            <small class="luxury-text-muted">{{ selectedMember.section || selectedMember.section_name || '' }} &middot; {{ selectedMember.role || '' }}</small>
                         </div>
                     </div>
                 </div>
@@ -241,7 +241,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useEventsStore } from '../stores/events'
 import { useAttendanceStore } from '../stores/attendance'
-import { api } from '../services/api'
 
 const eventsStore = useEventsStore()
 const attendanceStore = useAttendanceStore()
@@ -349,7 +348,7 @@ async function submitTakeAttendance() {
   try {
     submitting.value = true
     const records = Object.entries(takeList.value)
-      .filter(([_, status]) => !!status)
+      .filter(([, status]) => !!status)
       .map(([memberId, status]) => ({
         member_id: parseInt(memberId),
         status,
@@ -413,7 +412,7 @@ onMounted(() => {
 
 <style scoped>
 .attendance-page {
-    animation: fadeIn 0.3s ease;
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes fadeIn {
@@ -428,32 +427,40 @@ onMounted(() => {
 }
 
 .luxury-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 1.5rem;
+    background: var(--card-gradient);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(166, 123, 91, 0.2);
+    border-radius: 24px;
+    padding: 1.75rem;
 }
 
 .form-select,
 .form-control {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    border-radius: 8px;
+    background: rgba(166, 123, 91, 0.08);
+    border: 1px solid rgba(166, 123, 91, 0.3);
+    color: var(--text-primary);
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
+    transition: all 0.3s ease;
 }
 
 .form-select:focus,
 .form-control:focus {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(166, 123, 91, 0.12);
     border-color: var(--primary-color);
-    color: white;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.25rem rgba(166, 123, 91, 0.25);
 }
 
 .form-select option {
-    background: #1a1a2e;
-    color: white;
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.form-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
 }
 
 .table-dark {
@@ -462,7 +469,15 @@ onMounted(() => {
 
 .table-dark td,
 .table-dark th {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(166, 123, 91, 0.15);
+}
+
+.luxury-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.luxury-table tbody tr:hover {
+    background: rgba(166, 123, 91, 0.08);
 }
 
 .avatar-sm {
@@ -470,7 +485,7 @@ onMounted(() => {
     height: 36px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(102, 126, 234, 0.5);
+    border: 2px solid var(--primary-color);
 }
 
 .avatar-xs {
@@ -478,10 +493,10 @@ onMounted(() => {
     height: 28px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid rgba(102, 126, 234, 0.5);
+    border: 1px solid var(--primary-color);
 }
 
-.badge {
+.luxury-badge {
     padding: 0.4rem 0.75rem;
     border-radius: 50px;
     font-weight: 500;
@@ -493,11 +508,12 @@ onMounted(() => {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(26, 18, 10, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 2000;
+    backdrop-filter: blur(8px);
 }
 
 .modal-content {
@@ -507,11 +523,6 @@ onMounted(() => {
     overflow-y: auto;
 }
 
-.form-label {
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
 .text-secondary {
     color: var(--text-secondary) !important;
 }
@@ -519,5 +530,25 @@ onMounted(() => {
 .btn-group-sm .btn {
     padding: 0.25rem 0.5rem;
     font-size: 0.8rem;
+}
+
+.luxury-text-muted {
+    color: var(--text-secondary);
+}
+
+.luxury-event-title {
+    color: var(--text-primary);
+}
+
+.luxury-subtitle {
+    color: var(--text-secondary);
+}
+
+.luxury-heading {
+    color: var(--text-primary);
+}
+
+.luxury-subheading {
+    color: var(--text-primary);
 }
 </style>

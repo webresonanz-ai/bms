@@ -2,8 +2,8 @@
     <div class="login-page d-flex align-items-center justify-content-center min-vh-100">
         <div class="login-card luxury-card">
             <div class="text-center mb-4">
-                <h2 class="fw-bold">Welcome Back</h2>
-                <p class="text-white-50">Sign in to your BMS account</p>
+                <h2 class="fw-bold luxury-heading">Welcome Back</h2>
+                <p class="luxury-subtitle">Sign in to your BMS account</p>
             </div>
 
             <form @submit.prevent="handleLogin">
@@ -15,13 +15,13 @@
                     <label class="form-label">Password</label>
                     <input type="password" class="form-control" v-model="form.password" required>
                 </div>
-                <button type="submit" class="btn btn-gradient w-100" :disabled="loading">
+                <button type="submit" class="btn btn-gradient w-100 luxury-btn" :disabled="loading">
                     <span v-if="loading">Signing in...</span>
                     <span v-else>Sign In</span>
                 </button>
-                <div v-if="error" class="alert alert-danger mt-3">{{ error }}</div>
+                <div v-if="error" class="alert alert-danger mt-3 luxury-alert">{{ error }}</div>
                 <div class="text-center mt-3">
-                    <router-link to="/register" class="text-white-50">Need an account? Register</router-link>
+                    <router-link to="/register" class="luxury-link">Need an account? Register</router-link>
                 </div>
             </form>
         </div>
@@ -60,7 +60,7 @@ async function handleLogin() {
 
 <style scoped>
 .login-page {
-    background: linear-gradient(135deg, #0f0c29, #1a1a2e, #16213e);
+    background: linear-gradient(135deg, var(--dark-bg), var(--card-bg), #3D2B1F);
 }
 
 .login-card {
@@ -70,16 +70,32 @@ async function handleLogin() {
 }
 
 .form-control {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    border-radius: 8px;
+    background: rgba(166, 123, 91, 0.08);
+    border: 1px solid rgba(166, 123, 91, 0.3);
+    color: var(--text-primary);
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
 }
 
 .form-control:focus {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(166, 123, 91, 0.12);
     border-color: var(--primary-color);
-    color: white;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.25rem rgba(166, 123, 91, 0.25);
+}
+
+.luxury-alert {
+    background: rgba(160, 82, 45, 0.1);
+    border: 1px solid rgba(160, 82, 45, 0.3);
+    color: var(--text-primary);
+}
+
+.luxury-link {
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.luxury-link:hover {
+    color: var(--gold-text);
 }
 </style>

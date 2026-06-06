@@ -2,11 +2,11 @@
     <div class="dashboard">
         <div class="row mb-4">
             <div class="col-12">
-                <h2 class="fw-bold mb-2">
-                    <i class="bi bi-music-note-list me-2"></i>
+                <h2 class="fw-bold mb-2 luxury-heading">
+                    <i class="bi bi-music-note-list me-2 text-gold"></i>
                     Dashboard Overview
                 </h2>
-                <p class="text-white-50">Welcome back, {{ user?.name || 'Guest' }}! Here's your choir's overview.</p>
+                <p class="luxury-subtitle">Welcome back, {{ user?.name || 'Guest' }}! Here's your choir's overview.</p>
             </div>
         </div>
 
@@ -18,10 +18,10 @@
                         <div class="stat-icon">
                             <i class="bi bi-people-fill text-white"></i>
                         </div>
-                        <span class="badge bg-success">+12%</span>
+                        <span class="badge-earth">+12%</span>
                     </div>
                     <h3 class="stat-value">{{ activeMembersCount }}</h3>
-                    <p class="text-white-50 mb-0">Active Members</p>
+                    <p class="luxury-text-muted mb-0">Active Members</p>
                 </div>
             </div>
 
@@ -31,10 +31,10 @@
                         <div class="stat-icon">
                             <i class="bi bi-calendar-check-fill text-white"></i>
                         </div>
-                        <span class="badge bg-info">{{ upcomingEventsCount }}</span>
+                        <span class="badge-gold">{{ upcomingEventsCount }}</span>
                     </div>
                     <h3 class="stat-value">{{ upcomingEventsCount }}</h3>
-                    <p class="text-white-50 mb-0">Upcoming Events</p>
+                    <p class="luxury-text-muted mb-0">Upcoming Events</p>
                 </div>
             </div>
 
@@ -44,10 +44,10 @@
                         <div class="stat-icon">
                             <i class="bi bi-mic-fill text-white"></i>
                         </div>
-                        <span class="badge bg-warning">Active</span>
+                        <span class="badge-earth-outline">Active</span>
                     </div>
                     <h3 class="stat-value">{{ totalPerformances }}</h3>
-                    <p class="text-white-50 mb-0">Total Performances</p>
+                    <p class="luxury-text-muted mb-0">Total Performances</p>
                 </div>
             </div>
 
@@ -57,10 +57,10 @@
                         <div class="stat-icon">
                             <i class="bi bi-star-fill text-white"></i>
                         </div>
-                        <span class="badge bg-primary">Rating</span>
+                        <span class="badge-gold">Rating</span>
                     </div>
                     <h3 class="stat-value">4.9</h3>
-                    <p class="text-white-50 mb-0">Overall Rating</p>
+                    <p class="luxury-text-muted mb-0">Overall Rating</p>
                 </div>
             </div>
         </div>
@@ -68,15 +68,15 @@
         <!-- Charts and Recent Activity -->
         <div class="row g-4">
             <div class="col-lg-8">
-                <div class="luxury-card">
-                    <h5 class="fw-bold mb-4">
-                        <i class="bi bi-graph-up me-2"></i>
+                <div class="luxury-card chart-card">
+                    <h5 class="fw-bold mb-4 luxury-subheading">
+                        <i class="bi bi-graph-up me-2 text-gold"></i>
                         Performance Analytics
                     </h5>
                     <div class="chart-placeholder">
                         <div class="d-flex align-items-center justify-content-center h-100">
-                            <div class="text-center text-white-50">
-                                <i class="bi bi-bar-chart-fill display-4 mb-3"></i>
+                            <div class="text-center luxury-text-muted">
+                                <i class="bi bi-bar-chart-fill display-4 mb-3 text-gold"></i>
                                 <p>Performance chart will be displayed here</p>
                                 <p class="small">Monthly performance statistics</p>
                             </div>
@@ -86,17 +86,17 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="luxury-card">
-                    <h5 class="fw-bold mb-4">
-                        <i class="bi bi-clock-history me-2"></i>
+                <div class="luxury-card activity-card">
+                    <h5 class="fw-bold mb-4 luxury-subheading">
+                        <i class="bi bi-clock-history me-2 text-gold"></i>
                         Recent Activities
                     </h5>
                     <div class="activity-list">
-                        <div v-for="(activity, index) in recentActivities" :key="index" class="activity-item">
+                        <div v-for="(activity, index) in recentActivities" :key="index" class="activity-item luxury-activity-item">
                             <div class="activity-dot"></div>
                             <div class="ms-3">
-                                <p class="mb-0 fw-semibold">{{ activity.title }}</p>
-                                <small class="text-white-50">{{ activity.time }}</small>
+                                <p class="mb-0 fw-semibold luxury-event-title">{{ activity.title }}</p>
+                                <small class="luxury-text-muted">{{ activity.time }}</small>
                             </div>
                         </div>
                     </div>
@@ -107,19 +107,19 @@
         <!-- Upcoming Events Quick View -->
         <div class="row mt-4">
             <div class="col-12">
-                <div class="luxury-card">
+                <div class="luxury-card events-table-card">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="fw-bold mb-0">
-                            <i class="bi bi-calendar-event me-2"></i>
+                        <h5 class="fw-bold mb-0 luxury-subheading">
+                            <i class="bi bi-calendar-event me-2 text-gold"></i>
                             Upcoming Events
                         </h5>
-                        <router-link to="/events" class="btn btn-gradient btn-sm">
+                        <router-link to="/events" class="btn btn-gradient btn-sm luxury-btn-sm">
                             View All
                             <i class="bi bi-arrow-right ms-2"></i>
                         </router-link>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-dark table-hover">
+                        <table class="table table-dark table-hover luxury-table">
                             <thead>
                                 <tr>
                                     <th>Event</th>
@@ -130,13 +130,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="event in (upcomingEvents || []).slice(0, 3)" :key="event.id">
+                                <tr v-for="event in (upcomingEvents || []).slice(0, 3)" :key="event.id" class="luxury-table-row">
                                     <td>{{ event.title }}</td>
                                     <td>{{ formatDate(event.date) }}</td>
                                     <td>{{ event.location }}</td>
                                     <td>{{ event.participants }}</td>
                                     <td>
-                                        <span class="badge bg-success">Upcoming</span>
+                                        <span class="badge-earth">Upcoming</span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -190,16 +190,17 @@ const formatDate = (date) => {
 <style scoped>
 .chart-placeholder {
     height: 300px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    border: 2px dashed rgba(255, 255, 255, 0.1);
+    background: rgba(166, 123, 91, 0.05);
+    border-radius: 16px;
+    border: 2px dashed rgba(166, 123, 91, 0.2);
+    backdrop-filter: blur(5px);
 }
 
 .activity-item {
     display: flex;
     align-items: center;
     padding: 1rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(166, 123, 91, 0.15);
 }
 
 .activity-item:last-child {
@@ -211,15 +212,42 @@ const formatDate = (date) => {
     height: 8px;
     background: var(--primary-gradient);
     border-radius: 50%;
+    box-shadow: 0 0 10px rgba(166, 123, 91, 0.4);
 }
 
-.table-dark {
+.luxury-table {
     --bs-table-bg: transparent;
     --bs-table-color: var(--text-primary);
+    --bs-table-border-color: rgba(166, 123, 91, 0.15);
 }
 
-.table-dark thead th {
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+.luxury-table thead th {
+    border-bottom: 2px solid rgba(166, 123, 91, 0.2);
     color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+.luxury-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.luxury-table tbody tr:hover {
+    background: rgba(166, 123, 91, 0.1);
+}
+
+.luxury-btn-sm {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.875rem;
+}
+
+.luxury-text-muted {
+    color: var(--text-secondary);
+}
+
+.luxury-event-title {
+    color: var(--text-primary);
 }
 </style>

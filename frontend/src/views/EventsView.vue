@@ -4,13 +4,13 @@
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h2 class="fw-bold mb-2">
-                            <i class="bi bi-calendar-event-fill me-2"></i>
+                        <h2 class="fw-bold mb-2 luxury-heading">
+                            <i class="bi bi-calendar-event-fill me-2 text-gold"></i>
                             Events Calendar
                         </h2>
-                        <p class="text-white-50">Manage and view all choir events</p>
+                        <p class="luxury-subtitle">Manage and view all choir events</p>
                     </div>
-                    <button class="btn btn-gradient" @click="showAddModal = true">
+                    <button class="btn btn-gradient luxury-btn" @click="showAddModal = true">
                         <i class="bi bi-plus-lg me-2"></i>
                         Add Event
                     </button>
@@ -21,17 +21,17 @@
         <div class="row g-4">
             <!-- Calendar View -->
             <div class="col-lg-8">
-                <div class="luxury-card">
+                <div class="luxury-card calendar-card">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="fw-bold mb-0">{{ currentMonthName }} {{ currentYear }}</h5>
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-outline-light" @click="previousMonth">
+                        <h5 class="fw-bold mb-0 luxury-subheading">{{ currentMonthName }} {{ currentYear }}</h5>
+                        <div class="btn-group luxury-group">
+                            <button class="btn btn-sm btn-outline-earth" @click="previousMonth">
                                 <i class="bi bi-chevron-left"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-light" @click="currentMonth = new Date().getMonth()">
+                            <button class="btn btn-sm btn-outline-earth" @click="currentMonth = new Date().getMonth()">
                                 Today
                             </button>
-                            <button class="btn btn-sm btn-outline-light" @click="nextMonth">
+                            <button class="btn btn-sm btn-outline-earth" @click="nextMonth">
                                 <i class="bi bi-chevron-right"></i>
                             </button>
                         </div>
@@ -57,34 +57,34 @@
 
             <!-- Upcoming Events List -->
             <div class="col-lg-4">
-                <div class="luxury-card">
-                    <h5 class="fw-bold mb-4">
-                        <i class="bi bi-list-ul me-2"></i>
+                <div class="luxury-card events-list-card">
+                    <h5 class="fw-bold mb-4 luxury-subheading">
+                        <i class="bi bi-list-ul me-2 text-gold"></i>
                         Upcoming Events
                     </h5>
                     <div class="event-list">
-                        <div v-for="event in eventsStore.upcomingEvents" :key="event.id" class="event-item">
-                            <div class="event-date">
+                        <div v-for="event in eventsStore.upcomingEvents" :key="event.id" class="event-item luxury-event-item" :class="`event-type-${event.type}`">
+                            <div class="event-date luxury-date-badge">
                                 <span class="date">{{ formatDay(event.date) }}</span>
                                 <span class="month">{{ formatMonth(event.date) }}</span>
                             </div>
                             <div class="event-details ms-3">
-                                <h6 class="mb-1">{{ event.title }}</h6>
-                                <p class="mb-0 text-white-50 small">
+                                <h6 class="mb-1 luxury-event-title">{{ event.title }}</h6>
+                                <p class="mb-0 luxury-text-muted">
                                     <i class="bi bi-geo-alt me-1"></i>{{ event.location }}
                                 </p>
-                                <p class="mb-0 text-white-50 small">
+                                <p class="mb-0 luxury-text-muted">
                                     <i class="bi bi-clock me-1"></i>{{ event.time }}
                                 </p>
                             </div>
-                            <div class="d-flex gap-1 ms-auto">
-                                <button class="btn btn-sm btn-outline-secondary" @click="openEditModal(event)" title="Edit event">
+                            <div class="d-flex gap-1 ms-auto luxury-actions">
+                                <button class="btn btn-sm btn-earth-outline" @click="openEditModal(event)" title="Edit event">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-primary" @click="openParticipantsModal(event)" title="Add participants">
+                                <button class="btn btn-sm btn-gold-outline" @click="openParticipantsModal(event)" title="Add participants">
                                     <i class="bi bi-person-plus"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger" @click="deleteEvent(event.id)">
+                                <button class="btn btn-sm btn-danger-earth" @click="deleteEvent(event.id)">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
@@ -125,7 +125,7 @@
                     </div>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-gradient flex-grow-1">Add Event</button>
-                        <button type="button" class="btn btn-outline-light"
+                        <button type="button" class="btn btn-earth-outline"
                             @click="showAddModal = false">Cancel</button>
                     </div>
                 </form>
@@ -178,54 +178,54 @@
                     </div>
                 </div>
             </div>
-            <div class="d-flex gap-2">
+<div class="d-flex gap-2">
                 <button type="submit" class="btn btn-gradient flex-grow-1" :disabled="selectedMemberIds.length === 0">
                     Add {{ selectedMemberIds.length }} Participant(s)
                 </button>
-                <button type="button" class="btn btn-outline-light"
+                <button type="button" class="btn btn-earth-outline"
                     @click="closeParticipantsModal">Cancel</button>
             </div>
         </form>
     </div>
 </div>
 
-         <!-- Edit Event Modal -->
-         <div v-if="showEditModal" class="modal-overlay">
-             <div class="modal-content luxury-card">
-                 <h4 class="fw-bold mb-4">Edit Event</h4>
-                 <form @submit.prevent="updateEvent">
-                     <div class="mb-3">
-                         <label class="form-label">Event Title</label>
-                         <input type="text" class="form-control" v-model="editingEvent.title" required>
-                     </div>
-                     <div class="mb-3">
-                         <label class="form-label">Date</label>
-                         <input type="date" class="form-control" v-model="editingEvent.date" required>
-                     </div>
-                     <div class="mb-3">
-                         <label class="form-label">Time</label>
-                         <input type="time" class="form-control" v-model="editingEvent.time" required>
-                     </div>
-                     <div class="mb-3">
-                         <label class="form-label">Location</label>
-                         <input type="text" class="form-control" v-model="editingEvent.location" required>
-                     </div>
-                     <div class="mb-3">
-                         <label class="form-label">Type</label>
-                         <select class="form-select" v-model="editingEvent.type">
-                             <option value="concert">Concert</option>
-                             <option value="rehearsal">Rehearsal</option>
-                             <option value="performance">Performance</option>
-                         </select>
-                     </div>
-                     <div class="d-flex gap-2">
-                         <button type="submit" class="btn btn-gradient flex-grow-1">Save Changes</button>
-                         <button type="button" class="btn btn-outline-light"
-                             @click="closeEditModal">Cancel</button>
-                     </div>
-                 </form>
-             </div>
-         </div>
+<!-- Edit Event Modal -->
+<div v-if="showEditModal" class="modal-overlay">
+    <div class="modal-content luxury-card">
+        <h4 class="fw-bold mb-4 luxury-subheading">Edit Event</h4>
+        <form @submit.prevent="updateEvent">
+            <div class="mb-3">
+                <label class="form-label">Event Title</label>
+                <input type="text" class="form-control" v-model="editingEvent.title" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Date</label>
+                <input type="date" class="form-control" v-model="editingEvent.date" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Time</label>
+                <input type="time" class="form-control" v-model="editingEvent.time" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Location</label>
+                <input type="text" class="form-control" v-model="editingEvent.location" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Type</label>
+                <select class="form-select" v-model="editingEvent.type">
+                    <option value="concert">Concert</option>
+                    <option value="rehearsal">Rehearsal</option>
+                    <option value="performance">Performance</option>
+                </select>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-gradient flex-grow-1">Save Changes</button>
+                <button type="button" class="btn btn-earth-outline"
+                    @click="closeEditModal">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
      </div>
 </template>
 
@@ -483,9 +483,10 @@ async function updateEvent() {
 
 <style scoped>
 .calendar-grid {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
+    background: rgba(166, 123, 91, 0.05);
+    border-radius: 16px;
     overflow: hidden;
+    border: 1px solid rgba(166, 123, 91, 0.15);
 }
 
 .calendar-headers,
@@ -495,82 +496,91 @@ async function updateEvent() {
 }
 
 .calendar-headers .calendar-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(166, 123, 91, 0.2);
 }
 
 .calendar-header {
-    padding: 0.75rem;
+    padding: 0.875rem;
     text-align: center;
     font-weight: 600;
     color: var(--text-secondary);
     font-size: 0.875rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(166, 123, 91, 0.15);
+    background: rgba(166, 123, 91, 0.08);
 }
 
 .calendar-day {
-    padding: 0.5rem;
-    min-height: 80px;
+    padding: 0.75rem 0.5rem;
+    min-height: 90px;
     text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(166, 123, 91, 0.1);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .calendar-day:hover {
-    background: rgba(102, 126, 234, 0.1);
+    background: rgba(166, 123, 91, 0.15);
+    transform: scale(1.03);
 }
 
 .calendar-day.other-month {
-    opacity: 0.3;
+    opacity: 0.4;
+    background: transparent;
 }
 
 .calendar-day.today {
-    background: rgba(102, 126, 234, 0.2);
+    background: rgba(166, 123, 91, 0.2);
+    border: 1px solid rgba(212, 175, 55, 0.4);
 }
 
 .calendar-day.today .day-number {
     background: var(--primary-gradient);
     color: white;
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 12px rgba(166, 123, 91, 0.3);
 }
 
 .day-number {
     font-weight: 500;
     margin-bottom: 0.5rem;
+    color: var(--text-primary);
 }
 
 .event-indicator {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     background: var(--primary-gradient);
     border-radius: 50%;
     margin: 0 auto;
+    box-shadow: 0 2px 8px rgba(166, 123, 91, 0.4);
 }
 
 .event-item {
     display: flex;
     align-items: center;
-    padding: 1rem;
-    border-radius: 12px;
-    margin-bottom: 0.75rem;
-    background: rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
+    padding: 1.25rem;
+    border-radius: 16px;
+    margin-bottom: 0.875rem;
+    background: rgba(166, 123, 91, 0.05);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(166, 123, 91, 0.1);
 }
 
 .event-item:hover {
-    background: rgba(102, 126, 234, 0.1);
-    transform: translateX(5px);
+    background: rgba(166, 123, 91, 0.12);
+    transform: translateX(8px);
 }
 
 .event-date {
     text-align: center;
-    min-width: 50px;
+    min-width: 56px;
 }
 
 .event-date .date {
@@ -578,6 +588,10 @@ async function updateEvent() {
     font-size: 1.5rem;
     font-weight: 700;
     line-height: 1;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .event-date .month {
@@ -586,17 +600,55 @@ async function updateEvent() {
     color: var(--text-secondary);
 }
 
+.luxury-date-badge {
+    background: rgba(166, 123, 91, 0.1);
+    border-radius: 12px;
+    padding: 0.5rem;
+}
+
+.luxury-event-title {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.luxury-text-muted {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.luxury-actions .btn {
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.luxury-actions .btn:hover {
+    transform: translateY(-2px);
+}
+
+.event-type-concert .luxury-date-badge {
+    background: rgba(212, 175, 55, 0.15);
+}
+
+.event-type-rehearsal .luxury-date-badge {
+    background: rgba(95, 115, 76, 0.15);
+}
+
+.event-type-performance .luxury-date-badge {
+    background: rgba(166, 123, 91, 0.2);
+}
+
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(26, 18, 10, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 2000;
+    backdrop-filter: blur(8px);
 }
 
 .modal-content {
@@ -608,28 +660,31 @@ async function updateEvent() {
 
 .form-control,
 .form-select {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    border-radius: 8px;
+    background: rgba(166, 123, 91, 0.08);
+    border: 1px solid rgba(166, 123, 91, 0.3);
+    color: var(--text-primary);
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
+    transition: all 0.3s ease;
 }
 
 .form-control:focus,
 .form-select:focus {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(166, 123, 91, 0.12);
     border-color: var(--primary-color);
-    color: white;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.25rem rgba(166, 123, 91, 0.25);
 }
 
 .form-label {
     color: var(--text-secondary);
     font-weight: 500;
+    margin-bottom: 0.5rem;
 }
 
 .form-check-input {
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(166, 123, 91, 0.1);
+    border: 1px solid rgba(166, 123, 91, 0.3);
 }
 
 .form-check-input:checked {
@@ -649,21 +704,23 @@ async function updateEvent() {
 }
 
 .input-group-text {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(166, 123, 91, 0.08);
+    border: 1px solid rgba(166, 123, 91, 0.3);
     color: var(--text-secondary);
+    border-radius: 12px 0 0 12px;
 }
 
 .input-group .form-control {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
+    background: rgba(166, 123, 91, 0.08);
+    border: 1px solid rgba(166, 123, 91, 0.3);
+    color: var(--text-primary);
+    border-radius: 0 12px 12px 0;
 }
 
 .input-group .form-control:focus {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(166, 123, 91, 0.12);
     border-color: var(--primary-color);
-    color: white;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.25rem rgba(166, 123, 91, 0.25);
 }
 </style>

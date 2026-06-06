@@ -103,6 +103,7 @@ export const useMembersStore = defineStore('members', () => {
     fetchMembersBySection,
     addMember,
     updateMemberStatus,
+    updateMember,
     deleteMember
   }
 })

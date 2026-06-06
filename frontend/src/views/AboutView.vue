@@ -152,8 +152,8 @@ const achievements = [
 
 <style scoped>
 .hero-section {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-    border: 1px solid rgba(102, 126, 234, 0.3);
+    background: linear-gradient(135deg, rgba(166, 123, 91, 0.08), rgba(193, 154, 107, 0.05));
+    border: 1px solid rgba(166, 123, 91, 0.2);
 }
 
 .hero-image {
@@ -166,19 +166,20 @@ const achievements = [
     align-items: center;
     justify-content: center;
     color: white;
-    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 10px 40px rgba(166, 123, 91, 0.3);
 }
 
 .card-icon {
     width: 50px;
     height: 50px;
     background: var(--primary-gradient);
-    border-radius: 12px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
     color: white;
+    box-shadow: 0 4px 12px rgba(166, 123, 91, 0.3);
 }
 
 .leader-avatar {
@@ -186,24 +187,25 @@ const achievements = [
     height: 100px;
     border-radius: 50%;
     border: 3px solid var(--primary-color);
+    box-shadow: 0 4px 12px rgba(166, 123, 91, 0.2);
 }
 
 .leader-card {
     padding: 1.5rem;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.03);
-    transition: all 0.3s ease;
+    border-radius: 16px;
+    background: rgba(166, 123, 91, 0.05);
+    transition: all 0.4s ease;
 }
 
 .leader-card:hover {
-    background: rgba(102, 126, 234, 0.1);
+    background: rgba(166, 123, 91, 0.12);
     transform: translateY(-5px);
 }
 
 .achievement-card {
     padding: 1.5rem;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    background: rgba(166, 123, 91, 0.05);
     border-left: 4px solid var(--primary-color);
 }
 
@@ -217,11 +219,31 @@ const achievements = [
     margin-bottom: 1rem;
 }
 
+.luxury-text-muted {
+    color: var(--text-secondary);
+}
+
+.luxury-event-title {
+    color: var(--text-primary);
+}
+
+.luxury-heading {
+    color: var(--text-primary);
+}
+
 @media (max-width: 768px) {
     .hero-image {
         width: 150px;
         height: 150px;
         margin-top: 2rem;
+    }
+    
+    .stats-row {
+        flex-wrap: wrap;
+    }
+    
+    .stat {
+        flex: 1 1 30%;
     }
 }
 </style>

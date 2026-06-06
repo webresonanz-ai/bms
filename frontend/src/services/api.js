@@ -19,10 +19,24 @@ export async function apiFetch(endpoint, options = {}) {
   }
 
   const response = await fetch(`${API_BASE}${endpoint}`, config)
-  const data = await response.json()
+  const text = await response.text()
+
+  let data
+  let parseError = false
+  try {
+    data = text ? JSON.parse(text) : null
+  } catch (_err) {
+    parseError = true
+    data = null
+  }
 
   if (!response.ok) {
-    throw new Error(data.error || 'API request failed')
+    const message = data?.error || data?.message || text || 'API request failed'
+    throw new Error(message)
+  }
+
+  if (parseError && text) {
+    throw new Error(`Invalid JSON response from server: ${text.slice(0, 200)}`)
   }
 
   return data
@@ -101,10 +115,13 @@ createEvent: (data) => apiFetch('/events', {
      body: JSON.stringify({ member_ids: memberIds })
    }),
 
-  submitAttendance: (eventId, data) => apiFetch(`/events/${eventId}/attendance`, {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }),
+  submitAttendance: (eventId, data) => {
+    const payload = Array.isArray(data) ? { records: data } : data
+    return apiFetch(`/events/${eventId}/attendance`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+  },
 
   getAttendance: (eventId) => apiFetch(`/events/${eventId}/attendance`),
 

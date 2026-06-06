@@ -23,7 +23,8 @@
                             <select class="form-select" v-model="selectedEventId" @change="onEventChange">
                                 <option value="">-- Choose an event --</option>
                                 <option v-for="event in eventsStore.events" :key="event.id" :value="event.id">
-                                    {{ event.title }} &mdash; {{ formatDate(event.date) }} ({{ event.participants || 0 }} participants)
+                                    {{ event.title }} &mdash; {{ formatDate(event.date) }} ({{ event.participants || 0
+                                    }} participants)
                                 </option>
                             </select>
                         </div>
@@ -47,11 +48,16 @@
                             Members - {{ selectedEvent?.title }}
                         </h5>
                         <div class="d-flex gap-2">
-                            <select class="form-select form-select-sm" style="width: auto; background: rgba(166,123,91,0.08); border-color: rgba(166,123,91,0.3); color: var(--text-primary);" v-model="sectionFilter" @change="applyLocalFilters">
+                            <select class="form-select form-select-sm"
+                                style="width: auto; background: rgba(166,123,91,0.08); border-color: rgba(166,123,91,0.3); color: var(--text-primary);"
+                                v-model="sectionFilter" @change="applyLocalFilters">
                                 <option value="All">All Sections</option>
-                                <option v-for="section in attendanceStore.getSections()" :key="section" :value="section">{{ section }}</option>
+                                <option v-for="section in attendanceStore.getSections()" :key="section"
+                                    :value="section">{{ section }}</option>
                             </select>
-                            <select class="form-select form-select-sm" style="width: auto; background: rgba(166,123,91,0.08); border-color: rgba(166,123,91,0.3); color: var(--text-primary);" v-model="statusFilter" @change="applyLocalFilters">
+                            <select class="form-select form-select-sm"
+                                style="width: auto; background: rgba(166,123,91,0.08); border-color: rgba(166,123,91,0.3); color: var(--text-primary);"
+                                v-model="statusFilter" @change="applyLocalFilters">
                                 <option value="All">All Status</option>
                                 <option value="Present">Present</option>
                                 <option value="Absent">Absent</option>
@@ -75,7 +81,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(member, index) in attendanceStore.filteredParticipants" :key="member.id || member.member_id">
+                                <tr v-for="(member, index) in attendanceStore.filteredParticipants"
+                                    :key="member.id || member.member_id">
                                     <td>{{ index + 1 }}</td>
                                     <td>
                                         <div class="d-flex align-items-center">
@@ -95,20 +102,23 @@
                                     </td>
                                     <td>{{ member.attendance?.notes || '-' }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-earth-outline me-1" @click="openRecordModal(member)">
+                                        <button class="btn btn-sm btn-earth-outline me-1"
+                                            @click="openRecordModal(member)">
                                             <i class="bi bi-pencil"></i> Record
                                         </button>
                                     </td>
                                 </tr>
                                 <tr v-if="!attendanceStore.filteredParticipants.length">
-                                    <td colspan="7" class="text-center luxury-text-muted py-4">No members found for this event.</td>
+                                    <td colspan="7" class="text-center luxury-text-muted py-4">No members found for this
+                                        event.</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                        <small class="luxury-text-muted">Showing {{ attendanceStore.filteredParticipants.length }} of {{ attendanceStore.participantList.length }} members</small>
+                        <small class="luxury-text-muted">Showing {{ attendanceStore.filteredParticipants.length }} of {{
+                            attendanceStore.participantList.length }} members</small>
                         <div class="d-flex gap-2">
                             <button class="btn btn-earth-outline btn-sm" @click="attendanceStore.resetFilters()">
                                 <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
@@ -126,7 +136,8 @@
             <div class="col-12">
                 <div class="luxury-card text-center py-5">
                     <i class="bi bi-calendar-event fs-1 luxury-text-muted mb-3"></i>
-                    <p class="luxury-text-muted mb-0">Please select an event above to view and manage attendance records.</p>
+                    <p class="luxury-text-muted mb-0">Please select an event above to view and manage attendance
+                        records.</p>
                 </div>
             </div>
         </div>
@@ -138,7 +149,15 @@
                     <i class="bi bi-clipboard-check me-2"></i>
                     Take Attendance
                 </h4>
-                <p class="luxury-text-muted mb-4">Mark attendance for all members in <strong>{{ selectedEvent?.title }}</strong></p>
+                <p class="luxury-text-muted mb-4">Mark attendance for all members in <strong>{{ selectedEvent?.title
+                }}</strong></p>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Attendance Date</label>
+                        <input type="date" class="form-control" v-model="selectedAttendanceDate" :max="todayDate" />
+                    </div>
+                </div>
 
                 <div class="mb-3">
                     <label class="form-label">Search Member</label>
@@ -163,35 +182,33 @@
                                     </div>
                                 </td>
                                 <td>{{ member.section || member.section_name || '-' }}</td>
-                                <td>
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <input type="radio" class="btn-check" :id="'present-'+member.id" :name="'status-'+member.id" value="Present" v-model="takeList[member.id || member.member_id]" autocomplete="off">
-                                        <label class="btn btn-outline-success" :for="'present-'+member.id">P</label>
-
-                                        <input type="radio" class="btn-check" :id="'absent-'+member.id" :name="'status-'+member.id" value="Absent" v-model="takeList[member.id || member.member_id]" autocomplete="off">
-                                        <label class="btn btn-outline-danger" :for="'absent-'+member.id">A</label>
-
-                                        <input type="radio" class="btn-check" :id="'late-'+member.id" :name="'status-'+member.id" value="Late" v-model="takeList[member.id || member.member_id]" autocomplete="off">
-                                        <label class="btn btn-outline-warning" :for="'late-'+member.id">L</label>
-
-                                        <input type="radio" class="btn-check" :id="'excused-'+member.id" :name="'status-'+member.id" value="Excused" v-model="takeList[member.id || member.member_id]" autocomplete="off">
-                                        <label class="btn btn-outline-info" :for="'excused-'+member.id">E</label>
+                                <td class="text-center">
+                                    <div v-if="isPresentMarked(member)">
+                                        <span class="badge rounded-pill bg-success">Present</span>
+                                    </div>
+                                    <div v-else class="form-check d-flex justify-content-center">
+                                        <input class="form-check-input" type="checkbox"
+                                            :id="'present-checkbox-' + (member.id || member.member_id)"
+                                            @change="markPresent(member)" />
                                     </div>
                                 </td>
                             </tr>
-<tr v-if="!filteredTakeList.length">
-                                    <td colspan="3" class="text-center luxury-text-muted py-3">No members match your search.</td>
-                                </tr>
+                            <tr v-if="!filteredTakeList.length">
+                                <td colspan="3" class="text-center luxury-text-muted py-3">No members match your search.
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
 
                 <div class="d-flex gap-2 mt-3">
-                    <button type="button" class="btn btn-gradient flex-grow-1" @click="submitTakeAttendance" :disabled="submitting">
+                    <button type="button" class="btn btn-gradient flex-grow-1" @click="submitTakeAttendance"
+                        :disabled="submitting">
                         <span v-if="submitting" class="spinner-border spinner-border-sm me-2"></span>
                         Save Attendance
                     </button>
-                    <button type="button" class="btn btn-outline-light" @click="closeTakeModal" :disabled="submitting">Cancel</button>
+                    <button type="button" class="btn btn-outline-light" @click="closeTakeModal"
+                        :disabled="submitting">Cancel</button>
                 </div>
             </div>
         </div>
@@ -208,7 +225,8 @@
                         <img :src="selectedMember.avatar || defaultAvatar" class="avatar-sm me-3" alt="">
                         <div>
                             <div class="fw-semibold">{{ selectedMember.name }}</div>
-                            <small class="luxury-text-muted">{{ selectedMember.section || selectedMember.section_name || '' }} &middot; {{ selectedMember.role || '' }}</small>
+                            <small class="luxury-text-muted">{{ selectedMember.section || selectedMember.section_name ||
+                                '' }} &middot; {{ selectedMember.role || '' }}</small>
                         </div>
                     </div>
                 </div>
@@ -225,11 +243,13 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Notes</label>
-                        <textarea class="form-control" v-model="recordForm.notes" rows="3" placeholder="Optional notes..."></textarea>
+                        <textarea class="form-control" v-model="recordForm.notes" rows="3"
+                            placeholder="Optional notes..."></textarea>
                     </div>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-gradient flex-grow-1">Save</button>
-                        <button type="button" class="btn btn-outline-light" @click="closeRecordModal" :disabled="submitting">Cancel</button>
+                        <button type="button" class="btn btn-outline-light" @click="closeRecordModal"
+                            :disabled="submitting">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -238,7 +258,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useEventsStore } from '../stores/events'
 import { useAttendanceStore } from '../stores/attendance'
 
@@ -256,157 +276,237 @@ const statusFilter = ref('All')
 
 const selectedMember = ref(null)
 const recordForm = ref({
-  status: '',
-  notes: ''
+    status: '',
+    notes: ''
 })
 
 const takeList = ref({})
+const selectedAttendanceDate = ref(formatDateInputValue(new Date()))
+const todayDate = ref(formatDateInputValue(new Date()))
 
 const defaultAvatar = 'https://i.pravatar.cc/150?img=5'
 
 const selectedEvent = computed(() => {
-  return eventsStore.events.find(e => e.id === selectedEventId.value) || attendanceStore.currentEvent
+    return eventsStore.events.find(e => e.id === selectedEventId.value) || attendanceStore.currentEvent
 })
 
 const filteredTakeList = computed(() => {
-  const list = attendanceStore.filteredParticipants
-  if (!searchMember.value) return list
-  const q = searchMember.value.toLowerCase()
-  return list.filter(p => (p.name || '').toLowerCase().includes(q))
+    const list = attendanceStore.filteredParticipants
+    if (!searchMember.value) return list
+    const q = searchMember.value.toLowerCase()
+    return list.filter(p => (p.name || '').toLowerCase().includes(q))
 })
 
 function formatDate(date) {
-  if (!date) return '-'
-  return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    if (!date) return '-'
+    return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+function formatTimestampForServer(date) {
+    const pad = (value) => value.toString().padStart(2, '0')
+    const d = date instanceof Date ? date : new Date(date)
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+
+function formatDateInputValue(date) {
+    const d = date instanceof Date ? date : new Date(date)
+    const pad = (value) => value.toString().padStart(2, '0')
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+function getDateFromInput(value) {
+    const [year, month, day] = (value || '').split('-').map(Number)
+    if (!year || !month || !day) return null
+    return new Date(year, month - 1, day, 0, 0, 0)
+}
+
+function isAttendanceOnDate(member, date) {
+    const recordedAt = member.attendance?.recorded_at
+    if (!recordedAt) return false
+    const recorded = new Date(recordedAt)
+    if (Number.isNaN(recorded.getTime())) return false
+
+    const compareDate = date instanceof Date ? date : new Date(date)
+    return recorded.getFullYear() === compareDate.getFullYear() && recorded.getMonth() === compareDate.getMonth() && recorded.getDate() === compareDate.getDate()
 }
 
 function attendanceBadgeClass(member) {
-  const status = getAttendanceStatus(member)
-  switch (status) {
-    case 'Present':
-      return 'bg-success'
-    case 'Absent':
-      return 'bg-danger'
-    case 'Late':
-      return 'bg-warning text-dark'
-    case 'Excused':
-      return 'bg-info text-dark'
-    default:
-      return 'bg-secondary'
-  }
+    const status = getAttendanceStatus(member)
+    switch (status) {
+        case 'Present':
+            return 'bg-success'
+        case 'Absent':
+            return 'bg-danger'
+        case 'Late':
+            return 'bg-warning text-dark'
+        case 'Excused':
+            return 'bg-info text-dark'
+        default:
+            return 'bg-secondary'
+    }
 }
 
 function getAttendanceStatus(member) {
-  if (member.attendance && member.attendance.status) {
-    return member.attendance.status
-  }
-  if (member.status === 'attended') return 'Present'
-  if (member.status === 'absent') return 'Absent'
-  return 'Not Recorded'
+    if (member.attendance && member.attendance.status) {
+        return member.attendance.status
+    }
+    if (member.status === 'attended') return 'Present'
+    if (member.status === 'absent') return 'Absent'
+    return 'Not Recorded'
 }
 
 async function onEventChange() {
-  sectionFilter.value = 'All'
-  statusFilter.value = 'All'
-  if (!selectedEventId.value) {
-    attendanceStore.reset()
-    return
-  }
-  try {
-    await attendanceStore.fetchEventParticipants(selectedEventId.value)
-  } catch (error) {
-    alert('Failed to load event participants: ' + error.message)
-  }
+    sectionFilter.value = 'All'
+    statusFilter.value = 'All'
+    if (!selectedEventId.value) {
+        attendanceStore.reset()
+        return
+    }
+    try {
+        await attendanceStore.fetchEventParticipants(selectedEventId.value)
+        await attendanceStore.fetchAttendance(selectedEventId.value)
+    } catch (error) {
+        alert('Failed to load event participants: ' + error.message)
+    }
 }
 
 function applyLocalFilters() {
-  attendanceStore.selectedSection = sectionFilter.value
-  attendanceStore.selectedStatus = statusFilter.value
-  attendanceStore.applyFilters()
+    attendanceStore.selectedSection = sectionFilter.value
+    attendanceStore.selectedStatus = statusFilter.value
+    attendanceStore.applyFilters()
 }
 
 function openTakeAttendanceModal() {
-  if (!selectedEventId.value) return
-  takeList.value = {}
-  const list = attendanceStore.participantList
-  list.forEach(p => {
-    const id = p.id || p.member_id
-    const status = p.attendance?.status
-    if (status) {
-      takeList.value[id] = status
-    }
-  })
-  showTakeModal.value = true
+    if (!selectedEventId.value) return
+    selectedAttendanceDate.value = todayDate.value
+    takeList.value = {}
+    const selectedDate = getDateFromInput(selectedAttendanceDate.value)
+
+    attendanceStore.participantList.forEach(p => {
+        const id = p.id || p.member_id
+        if (selectedDate && isAttendanceOnDate(p, selectedDate) && p.attendance?.status === 'Present') {
+            takeList.value[id] = 'Present'
+        }
+    })
+    showTakeModal.value = true
 }
 
+watch(selectedAttendanceDate, (newValue, oldValue) => {
+    if (!showTakeModal.value) return
+    const selectedDate = getDateFromInput(newValue)
+    takeList.value = {}
+
+    attendanceStore.participantList.forEach(p => {
+        const id = p.id || p.member_id
+        if (selectedDate && isAttendanceOnDate(p, selectedDate) && p.attendance?.status === 'Present') {
+            takeList.value[id] = 'Present'
+        }
+    })
+})
+
 function closeTakeModal() {
-  showTakeModal.value = false
-  searchMember.value = ''
+    showTakeModal.value = false
+    searchMember.value = ''
+}
+
+function isPresentMarked(member) {
+    const id = member.id || member.member_id
+    const selectedDate = getDateFromInput(selectedAttendanceDate.value)
+    return takeList.value[id] === 'Present' || (member.attendance?.status === 'Present' && selectedDate && isAttendanceOnDate(member, selectedDate))
+}
+
+function isAttendanceToday(member) {
+    const recordedAt = member.attendance?.recorded_at
+    if (!recordedAt) return false
+    const recorded = new Date(recordedAt)
+    if (Number.isNaN(recorded.getTime())) return false
+    const today = new Date()
+    return recorded.getFullYear() === today.getFullYear() && recorded.getMonth() === today.getMonth() && recorded.getDate() === today.getDate()
+}
+
+function markPresent(member) {
+    const id = member.id || member.member_id
+    takeList.value = {
+        ...takeList.value,
+        [id]: 'Present'
+    }
 }
 
 async function submitTakeAttendance() {
-  try {
-    submitting.value = true
-    const records = Object.entries(takeList.value)
-      .filter(([, status]) => !!status)
-      .map(([memberId, status]) => ({
-        member_id: parseInt(memberId),
-        status,
-        recorded_at: new Date().toISOString()
-      }))
+    try {
+        submitting.value = true
+        const selectedDate = getDateFromInput(selectedAttendanceDate.value)
+        if (!selectedDate) {
+            alert('Please select a valid attendance date.')
+            return
+        }
 
-    if (!records.length) {
-      alert('Please mark at least one member\'s attendance.')
-      return
+        const today = getDateFromInput(todayDate.value)
+        if (today && selectedDate > today) {
+            alert('Attendance date cannot be in the future.')
+            return
+        }
+
+        const records = Object.entries(takeList.value)
+            .filter(([, status]) => status === 'Present')
+            .map(([memberId, status]) => ({
+                member_id: parseInt(memberId),
+                status,
+                recorded_at: formatTimestampForServer(selectedDate)
+            }))
+
+        if (!records.length) {
+            alert('Please mark at least one member\'s attendance.')
+            return
+        }
+
+        await attendanceStore.submitBulkAttendance(selectedEventId.value, records)
+        closeTakeModal()
+    } catch (error) {
+        alert('Failed to submit attendance: ' + error.message)
+    } finally {
+        submitting.value = false
     }
-
-    await attendanceStore.submitBulkAttendance(selectedEventId.value, records)
-    closeTakeModal()
-  } catch (error) {
-    alert('Failed to submit attendance: ' + error.message)
-  } finally {
-    submitting.value = false
-  }
 }
 
 function openRecordModal(member) {
-  selectedMember.value = member
-  recordForm.value = {
-    status: member.attendance?.status || '',
-    notes: member.attendance?.notes || ''
-  }
-  showRecordModal.value = true
+    selectedMember.value = member
+    recordForm.value = {
+        status: member.attendance?.status || '',
+        notes: member.attendance?.notes || ''
+    }
+    showRecordModal.value = true
 }
 
 function closeRecordModal() {
-  showRecordModal.value = false
-  selectedMember.value = null
-  recordForm.value = {
-    status: '',
-    notes: ''
-  }
+    showRecordModal.value = false
+    selectedMember.value = null
+    recordForm.value = {
+        status: '',
+        notes: ''
+    }
 }
 
 async function saveMemberAttendance() {
-  if (!selectedMember.value || !recordForm.value.status) return
-  try {
-    submitting.value = true
-    const memberId = selectedMember.value.id || selectedMember.value.member_id
-    await attendanceStore.recordAttendance(selectedEventId.value, memberId, {
-      status: recordForm.value.status,
-      notes: recordForm.value.notes,
-      recorded_at: new Date().toISOString()
-    })
-    closeRecordModal()
-  } catch (error) {
-    alert('Failed to save attendance: ' + error.message)
-  } finally {
-    submitting.value = false
-  }
+    if (!selectedMember.value || !recordForm.value.status) return
+    try {
+        submitting.value = true
+        const memberId = selectedMember.value.id || selectedMember.value.member_id
+        await attendanceStore.recordAttendance(selectedEventId.value, memberId, {
+            status: recordForm.value.status,
+            notes: recordForm.value.notes,
+            recorded_at: formatTimestampForServer(new Date())
+        })
+        closeRecordModal()
+    } catch (error) {
+        alert('Failed to save attendance: ' + error.message)
+    } finally {
+        submitting.value = false
+    }
 }
 
 onMounted(() => {
-  eventsStore.fetchEvents()
+    eventsStore.fetchEvents()
 })
 </script>
 
@@ -420,6 +520,7 @@ onMounted(() => {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

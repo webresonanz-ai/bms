@@ -32,12 +32,22 @@ export const useAttendanceStore = defineStore('attendance', () => {
     try {
       const response = await api.getAttendance(eventId)
       attendanceRecords.value = response
+      mergeAttendanceToParticipants()
     } catch (error) {
       console.error('Failed to fetch attendance:', error)
       throw error
     } finally {
       loading.value = false
     }
+  }
+
+  function mergeAttendanceToParticipants() {
+    const attendanceMap = new Map(attendanceRecords.value.map(record => [record.member_id || record.id, record]))
+    participantList.value = participantList.value.map(participant => ({
+      ...participant,
+      attendance: attendanceMap.get(participant.member_id || participant.id) || participant.attendance || null
+    }))
+    applyFilters()
   }
 
   async function recordAttendance(eventId, memberId, data) {
@@ -62,9 +72,19 @@ export const useAttendanceStore = defineStore('attendance', () => {
 
   async function submitBulkAttendance(eventId, records) {
     try {
-      const response = await api.submitAttendance(eventId, records)
+      const payload = Array.isArray(records)
+        ? { records }
+        : records && Array.isArray(records.records)
+          ? records
+          : { records: [] }
+      const response = await api.submitAttendance(eventId, payload)
+
+      if (!response || typeof response !== 'object') {
+        throw new Error('Invalid attendance response from server')
+      }
+
       attendanceRecords.value = response.attendance || response
-      await fetchEventParticipants(eventId)
+      mergeAttendanceToParticipants()
       return response
     } catch (error) {
       console.error('Failed to submit attendance:', error)

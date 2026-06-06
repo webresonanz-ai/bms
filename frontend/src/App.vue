@@ -48,6 +48,10 @@ onUnmounted(() => {
 .app-container {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 .main-content {
@@ -57,6 +61,10 @@ onUnmounted(() => {
   flex-direction: column;
   background: var(--dark-bg);
   transition: margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  max-width: 100vw;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .main-content.sidebar-collapsed {
@@ -67,6 +75,8 @@ onUnmounted(() => {
   padding: 2rem;
   flex: 1;
   background: var(--dark-bg);
+  box-sizing: border-box;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -76,6 +86,12 @@ onUnmounted(() => {
 
   .content-area {
     padding: 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .content-area {
+    padding: 0.75rem;
   }
 }
 </style>

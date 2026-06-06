@@ -96,10 +96,22 @@ const clearAutoHideTimeout = () => {
     background: rgba(26, 18, 10, 0.95);
     backdrop-filter: blur(15px);
     border-bottom: 1px solid rgba(166, 123, 91, 0.2);
-    padding: 1rem 2rem;
+    padding: 0.75rem 1rem;
     position: sticky;
     top: 0;
     z-index: 100;
+}
+
+@media (min-width: 768px) {
+    .navbar {
+        padding: 1rem 2rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .navbar {
+        padding: 0.5rem 0.75rem;
+    }
 }
 
 .sidebar-toggle {
@@ -107,9 +119,20 @@ const clearAutoHideTimeout = () => {
     transition: all 0.3s ease;
 }
 
-.sidebar-toggle:hover {
-    color: var(--gold-text);
-    transform: scale(1.1);
+@media (max-width: 400px) {
+    .user-dropdown .d-md-inline {
+        display: none !important;
+    }
+    .nav-avatar {
+        width: 28px;
+        height: 28px;
+    }
+    .dropdown.ms-3 {
+        margin-left: 0.5rem !important;
+    }
+    .sidebar-toggle {
+        font-size: 1.2rem;
+    }
 }
 
 .nav-avatar {

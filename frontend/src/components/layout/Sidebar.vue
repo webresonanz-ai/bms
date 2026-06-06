@@ -128,6 +128,8 @@ const closeSidebar = () => {
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
+        width: 280px;
+        max-width: 85vw;
         box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
         transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }

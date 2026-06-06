@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <Sidebar />
-    <div class="main-content">
+    <div class="main-content" :class="{ 'sidebar-collapsed': isCollapsed }">
       <Navbar />
       <div class="content-area">
         <router-view v-slot="{ Component }">
@@ -19,9 +19,11 @@
 import Sidebar from './components/layout/Sidebar.vue'
 import Navbar from './components/layout/Navbar.vue'
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useSidebarCollapse } from './composables/useSidebarCollapse'
 
 const isMobile = ref(false)
 const isSidebarOpen = ref(false)
+const { isCollapsed } = useSidebarCollapse()
 
 function checkMobile() {
   isMobile.value = window.innerWidth <= 768
@@ -57,6 +59,10 @@ onUnmounted(() => {
   transition: margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.main-content.sidebar-collapsed {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
 .content-area {
   padding: 2rem;
   flex: 1;
@@ -67,7 +73,7 @@ onUnmounted(() => {
   .main-content {
     margin-left: 0;
   }
-  
+
   .content-area {
     padding: 1rem;
   }

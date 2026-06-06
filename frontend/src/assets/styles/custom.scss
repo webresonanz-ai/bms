@@ -16,6 +16,8 @@
   --warning-color: #D2B48C;
   --danger-color: #A0522D;
   --info-color: #8B7355;
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
 }
 
 // Global Styles
@@ -313,12 +315,11 @@ body.sidebar-open {
     overflow: hidden;
 }
 
-@media (max-width: 768px) {
-  .main-content {
-    margin-left: 0 !important;
-  }
-  
-  .content-area {
-    padding: 1rem !important;
-  }
+.sidebar-collapse-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

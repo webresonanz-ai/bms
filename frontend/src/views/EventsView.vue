@@ -39,13 +39,13 @@
 
                     <!-- Calendar Grid -->
                     <div class="calendar-grid">
-                        <div class="row g-0">
-                            <div class="col calendar-header" v-for="day in daysOfWeek" :key="day">
+                        <div class="calendar-headers">
+                            <div class="calendar-header" v-for="day in daysOfWeek" :key="day">
                                 {{ day }}
                             </div>
                         </div>
-                        <div class="row g-0">
-                            <div v-for="(day, index) in calendarDays" :key="index" class="col calendar-day"
+                        <div class="calendar-days">
+                            <div v-for="(day, index) in calendarDays" :key="index" class="calendar-day"
                                 :class="{ 'other-month': !day.currentMonth, 'today': day.isToday, 'has-event': day.hasEvent }">
                                 <div class="day-number">{{ day.date }}</div>
                                 <div v-if="day.hasEvent" class="event-indicator"></div>
@@ -245,6 +245,16 @@ function deleteEvent(id) {
     background: rgba(255, 255, 255, 0.03);
     border-radius: 12px;
     overflow: hidden;
+}
+
+.calendar-headers,
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-headers .calendar-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .calendar-header {

@@ -1,60 +1,58 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { api } from '../services/api'
 
 export const useEventsStore = defineStore('events', () => {
-  const events = ref([
-    {
-      id: 1,
-      title: 'Annual Concert 2026',
-      date: '2026-06-15',
-      time: '19:00',
-      location: 'Grand Symphony Hall',
-      type: 'concert',
-      status: 'upcoming',
-      participants: 45
-    },
-    {
-      id: 2,
-      title: 'Rehearsal Session',
-      date: '2026-06-10',
-      time: '18:00',
-      location: 'Studio A',
-      type: 'rehearsal',
-      status: 'upcoming',
-      participants: 30
-    },
-    {
-      id: 3,
-      title: 'Community Performance',
-      date: '2026-06-20',
-      time: '16:00',
-      location: 'City Park Amphitheater',
-      type: 'performance',
-      status: 'upcoming',
-      participants: 25
-    }
-  ])
+  const events = ref([])
 
-  const upcomingEvents = computed(() => 
+  const upcomingEvents = computed(() =>
     events.value.filter(event => event.status === 'upcoming')
       .sort((a, b) => new Date(a.date) - new Date(b.date))
   )
 
-  function addEvent(event) {
-    events.value.push({
-      id: events.value.length + 1,
-      ...event,
-      status: 'upcoming'
-    })
+  async function fetchEvents() {
+    try {
+      const response = await api.getEvents()
+      events.value = response
+    } catch (error) {
+      console.error('Failed to fetch events:', error)
+    }
   }
 
-  function deleteEvent(id) {
-    events.value = events.value.filter(event => event.id !== id)
+  async function fetchUpcomingEvents() {
+    try {
+      const response = await api.getUpcomingEvents()
+      events.value = response
+    } catch (error) {
+      console.error('Failed to fetch upcoming events:', error)
+    }
+  }
+
+  async function addEvent(event) {
+    try {
+      const response = await api.createEvent(event)
+      events.value.push(response)
+    } catch (error) {
+      console.error('Failed to create event:', error)
+      throw error
+    }
+  }
+
+  async function deleteEvent(id) {
+    try {
+      await api.deleteEvent(id)
+      events.value = events.value.filter(event => event.id !== id)
+    } catch (error) {
+      console.error('Failed to delete event:', error)
+      throw error
+    }
   }
 
   return {
     events,
     upcomingEvents,
+    fetchEvents,
+    fetchUpcomingEvents,
     addEvent,
     deleteEvent
   }

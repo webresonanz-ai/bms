@@ -138,7 +138,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '../stores/auth'
 
 const authStore = useAuthStore()
@@ -146,11 +146,27 @@ const user = computed(() => authStore.user)
 const editMode = ref(false)
 
 const editForm = reactive({
-    name: user.value.name,
-    email: user.value.email,
-    phone: user.value.phone,
-    location: user.value.location,
-    bio: user.value.bio
+    name: '',
+    email: '',
+    phone: '',
+    location: '',
+    bio: ''
+})
+
+watch(user, (newUser) => {
+    if (newUser) {
+        editForm.name = newUser.name ?? ''
+        editForm.email = newUser.email ?? ''
+        editForm.phone = newUser.phone ?? ''
+        editForm.location = newUser.location ?? ''
+        editForm.bio = newUser.bio ?? ''
+    }
+}, { immediate: true })
+
+onMounted(() => {
+    if (authStore.token && !authStore.user) {
+        authStore.fetchProfile()
+    }
 })
 
 function formatDate(date) {
@@ -161,9 +177,13 @@ function formatDate(date) {
     })
 }
 
-function saveProfile() {
-    authStore.updateProfile({ ...editForm })
-    editMode.value = false
+async function saveProfile() {
+    try {
+        await authStore.updateProfile({ ...editForm })
+        editMode.value = false
+    } catch (error) {
+        alert('Failed to save profile: ' + error.message)
+    }
 }
 </script>
 

@@ -135,13 +135,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useMembersStore } from '../stores/members'
 
 const membersStore = useMembersStore()
 const showAddModal = ref(false)
 const selectedSection = ref(null)
-
 const newMember = ref({
     name: '',
     role: '',
@@ -158,6 +157,10 @@ const filteredMembers = computed(() => {
     return membersStore.members.filter(m => m.section === selectedSection.value)
 })
 
+onMounted(() => {
+    membersStore.fetchMembers()
+})
+
 function formatDate(date) {
     return new Date(date).toLocaleDateString('en-US', {
         month: 'long',
@@ -166,22 +169,30 @@ function formatDate(date) {
     })
 }
 
-function addNewMember() {
-    membersStore.addMember({ ...newMember.value })
-    showAddModal.value = false
-    newMember.value = {
-        name: '',
-        role: '',
-        section: 'Soprano',
-        email: '',
-        phone: '',
-        avatar: 'https://i.pravatar.cc/150?img=' + Math.floor(Math.random() * 70)
+async function addNewMember() {
+    try {
+        await membersStore.addMember({ ...newMember.value })
+        showAddModal.value = false
+        newMember.value = {
+            name: '',
+            role: '',
+            section: 'Soprano',
+            email: '',
+            phone: '',
+            avatar: 'https://i.pravatar.cc/150?img=' + Math.floor(Math.random() * 70)
+        }
+    } catch (error) {
+        alert('Failed to add member: ' + error.message)
     }
 }
 
-function deactivateMember(id) {
+async function deactivateMember(id) {
     if (confirm('Are you sure you want to deactivate this member?')) {
-        membersStore.updateMemberStatus(id, 'inactive')
+        try {
+            await membersStore.updateMemberStatus(id, 'inactive')
+        } catch (error) {
+            alert('Failed to update member: ' + error.message)
+        }
     }
 }
 

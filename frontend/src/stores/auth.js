@@ -1,34 +1,68 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { api } from '../services/api'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref({
-    id: 1,
-    name: 'Alexandra Williams',
-    email: 'alexandra.w@bms.com',
-    role: 'Music Director',
-    avatar: 'https://i.pravatar.cc/150?img=5',
-    joinDate: '2023-01-15',
-    bio: 'Passionate music director with 15 years of experience in choral conducting. Leading BMS Choir to new heights of musical excellence.',
-    phone: '+1 234-567-8900',
-    location: 'New York, USA',
-    specialization: 'Choral Conducting',
-    achievements: [
-      'International Choir Competition Gold Medalist 2025',
-      'Best Conductor Award 2024',
-      'Published "Modern Choral Techniques" 2023'
-    ]
-  })
+  const user = ref(null)
+  const token = ref(null)
 
-  const isAuthenticated = computed(() => !!user.value)
+  const isAuthenticated = computed(() => !!user.value && !!token.value)
 
-  function updateProfile(profileData) {
+  async function login(credentials) {
+    const response = await api.login(credentials)
+    user.value = response.user
+    token.value = response.token
+    localStorage.setItem('token', response.token)
+    return response
+  }
+
+  async function register(data) {
+    const response = await api.register(data)
+    user.value = response.user
+    token.value = response.token
+    localStorage.setItem('token', response.token)
+    return response
+  }
+
+  async function logout() {
+    user.value = null
+    token.value = null
+    localStorage.removeItem('token')
+  }
+
+  async function fetchProfile() {
+    if (!token.value) return
+    try {
+      const response = await api.getProfile()
+      user.value = response
+    } catch (error) {
+      console.error('Failed to fetch profile:', error)
+    }
+  }
+
+  async function updateProfile(profileData) {
+    if (!token.value) return
+    await api.updateProfile(profileData)
     user.value = { ...user.value, ...profileData }
+  }
+
+  function initFromStorage() {
+    const storedToken = localStorage.getItem('token')
+    if (storedToken) {
+      token.value = storedToken
+      fetchProfile()
+    }
   }
 
   return {
     user,
+    token,
     isAuthenticated,
-    updateProfile
+    login,
+    register,
+    logout,
+    fetchProfile,
+    updateProfile,
+    initFromStorage
   }
 })

@@ -1,47 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { api } from '../services/api'
 
 export const useMembersStore = defineStore('members', () => {
-  const members = ref([
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      role: 'Lead Soprano',
-      section: 'Soprano',
-      joinDate: '2024-01-15',
-      status: 'active',
-      avatar: 'https://i.pravatar.cc/150?img=1',
-      email: 'sarah.j@bms.com',
-      phone: '+1 234-567-8901',
-      performances: 25
-    },
-    {
-      id: 2,
-      name: 'Michael Chen',
-      role: 'Tenor Section Leader',
-      section: 'Tenor',
-      joinDate: '2023-09-20',
-      status: 'active',
-      avatar: 'https://i.pravatar.cc/150?img=2',
-      email: 'michael.c@bms.com',
-      phone: '+1 234-567-8902',
-      performances: 30
-    },
-    {
-      id: 3,
-      name: 'Emily Davis',
-      role: 'Alto',
-      section: 'Alto',
-      joinDate: '2024-03-10',
-      status: 'active',
-      avatar: 'https://i.pravatar.cc/150?img=3',
-      email: 'emily.d@bms.com',
-      phone: '+1 234-567-8903',
-      performances: 18
-    }
-  ])
+  const members = ref([])
 
-  const activeMembers = computed(() => 
+  const activeMembers = computed(() =>
     members.value.filter(member => member.status === 'active')
   )
 
@@ -56,20 +20,64 @@ export const useMembersStore = defineStore('members', () => {
     return sections
   })
 
-  function addMember(member) {
-    members.value.push({
-      id: members.value.length + 1,
-      ...member,
-      joinDate: new Date().toISOString().split('T')[0],
-      status: 'active',
-      performances: 0
-    })
+  async function fetchMembers() {
+    try {
+      const response = await api.getMembers()
+      members.value = response
+    } catch (error) {
+      console.error('Failed to fetch members:', error)
+    }
   }
 
-  function updateMemberStatus(id, status) {
-    const member = members.value.find(m => m.id === id)
-    if (member) {
-      member.status = status
+  async function fetchActiveMembers() {
+    try {
+      const response = await api.getActiveMembers()
+      members.value = response
+    } catch (error) {
+      console.error('Failed to fetch active members:', error)
+    }
+  }
+
+  async function fetchMembersBySection() {
+    try {
+      const response = await api.getMembersBySection()
+      const allMembers = Object.values(response).flat()
+      members.value = allMembers
+    } catch (error) {
+      console.error('Failed to fetch members by section:', error)
+    }
+  }
+
+  async function addMember(member) {
+    try {
+      const response = await api.createMember(member)
+      members.value.push(response)
+    } catch (error) {
+      console.error('Failed to create member:', error)
+      throw error
+    }
+  }
+
+  async function updateMemberStatus(id, status) {
+    try {
+      await api.updateMemberStatus(id, status)
+      const member = members.value.find(m => m.id === id)
+      if (member) {
+        member.status = status
+      }
+    } catch (error) {
+      console.error('Failed to update member status:', error)
+      throw error
+    }
+  }
+
+  async function deleteMember(id) {
+    try {
+      await api.deleteMember(id)
+      members.value = members.value.filter(m => m.id !== id)
+    } catch (error) {
+      console.error('Failed to delete member:', error)
+      throw error
     }
   }
 
@@ -77,7 +85,11 @@ export const useMembersStore = defineStore('members', () => {
     members,
     activeMembers,
     membersBySection,
+    fetchMembers,
+    fetchActiveMembers,
+    fetchMembersBySection,
     addMember,
-    updateMemberStatus
+    updateMemberStatus,
+    deleteMember
   }
 })

@@ -40,8 +40,8 @@
         </nav>
 
         <div class="sidebar-footer p-4">
-            <div class="user-card">
-                <img :src="user.avatar" :alt="user.name" class="avatar">
+            <div v-if="user" class="user-card">
+                <img :src="user.avatar || defaultAvatar" :alt="user.name" class="avatar">
                 <div class="user-info">
                     <h6 class="mb-0">{{ user.name }}</h6>
                     <small class="text-white-50">{{ user.role }}</small>
@@ -57,6 +57,7 @@ import { computed } from 'vue'
 
 const authStore = useAuthStore()
 const user = computed(() => authStore.user)
+const defaultAvatar = 'https://i.pravatar.cc/150?img=5'
 </script>
 
 <style scoped>

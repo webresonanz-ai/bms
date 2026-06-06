@@ -127,13 +127,17 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useEventsStore } from '../stores/events'
 
 const eventsStore = useEventsStore()
 const showAddModal = ref(false)
 const currentMonth = ref(new Date().getMonth())
 const currentYear = ref(new Date().getFullYear())
+
+onMounted(() => {
+    eventsStore.fetchUpcomingEvents()
+})
 
 const newEvent = ref({
     title: '',
@@ -220,22 +224,30 @@ function formatMonth(date) {
     return new Date(date).toLocaleDateString('en-US', { month: 'short' })
 }
 
-function addNewEvent() {
-    eventsStore.addEvent({ ...newEvent.value })
-    showAddModal.value = false
-    newEvent.value = {
-        title: '',
-        date: '',
-        time: '',
-        location: '',
-        type: 'rehearsal',
-        participants: 0
+async function addNewEvent() {
+    try {
+        await eventsStore.addEvent({ ...newEvent.value })
+        showAddModal.value = false
+        newEvent.value = {
+            title: '',
+            date: '',
+            time: '',
+            location: '',
+            type: 'rehearsal',
+            participants: 0
+        }
+    } catch (error) {
+        alert('Failed to add event: ' + error.message)
     }
 }
 
-function deleteEvent(id) {
+async function deleteEvent(id) {
     if (confirm('Are you sure you want to delete this event?')) {
-        eventsStore.deleteEvent(id)
+        try {
+            await eventsStore.deleteEvent(id)
+        } catch (error) {
+            alert('Failed to delete event: ' + error.message)
+        }
     }
 }
 </script>

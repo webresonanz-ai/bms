@@ -22,10 +22,13 @@
                 </div>
 
                 <div class="dropdown ms-3">
-                    <button class="btn btn-link text-white dropdown-toggle d-flex align-items-center"
+                    <button v-if="user" class="btn btn-link text-white dropdown-toggle d-flex align-items-center"
                         data-bs-toggle="dropdown">
-                        <img :src="user.avatar" :alt="user.name" class="nav-avatar me-2">
+                        <img :src="user.avatar || defaultAvatar" :alt="user.name" class="nav-avatar me-2">
                         <span class="d-none d-md-inline">{{ user.name }}</span>
+                    </button>
+                    <button v-else class="btn btn-link text-white" @click="goToLogin">
+                        <i class="bi bi-person-circle fs-4"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><router-link to="/profile" class="dropdown-item">Profile</router-link></li>
@@ -33,7 +36,7 @@
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item text-danger" href="#">Logout</a></li>
+                        <li><a class="dropdown-item text-danger" href="#" @click="logout">Logout</a></li>
                     </ul>
                 </div>
             </div>
@@ -44,13 +47,24 @@
 <script setup>
 import { useAuthStore } from '../../stores/auth'
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
+const router = useRouter()
 const user = computed(() => authStore.user)
+const defaultAvatar = 'https://i.pravatar.cc/150?img=5'
 
 const toggleSidebar = () => {
-    // Mobile sidebar toggle logic
     document.querySelector('.sidebar')?.classList.toggle('show')
+}
+
+const goToLogin = () => {
+    router.push('/login')
+}
+
+const logout = () => {
+    authStore.logout()
+    router.push('/login')
 }
 </script>
 

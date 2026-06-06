@@ -6,7 +6,7 @@
                     <i class="bi bi-music-note-list me-2"></i>
                     Dashboard Overview
                 </h2>
-                <p class="text-white-50">Welcome back, {{ user.name }}! Here's your choir's overview.</p>
+                <p class="text-white-50">Welcome back, {{ user?.name || 'Guest' }}! Here's your choir's overview.</p>
             </div>
         </div>
 
@@ -130,7 +130,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="event in upcomingEvents.slice(0, 3)" :key="event.id">
+                                <tr v-for="event in (upcomingEvents || []).slice(0, 3)" :key="event.id">
                                     <td>{{ event.title }}</td>
                                     <td>{{ formatDate(event.date) }}</td>
                                     <td>{{ event.location }}</td>
@@ -149,7 +149,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useMembersStore } from '../stores/members'
 import { useEventsStore } from '../stores/events'
@@ -165,6 +165,11 @@ const upcomingEventsCount = computed(() => upcomingEvents.value.length)
 const totalPerformances = computed(() =>
     membersStore.members.reduce((sum, member) => sum + member.performances, 0)
 )
+
+onMounted(() => {
+    eventsStore.fetchUpcomingEvents()
+    membersStore.fetchActiveMembers()
+})
 
 const recentActivities = [
     { title: 'New member joined: David Wilson', time: '2 hours ago' },

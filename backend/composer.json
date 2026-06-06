@@ -1,0 +1,22 @@
+{
+    "name": "bms/backend",
+    "autoload": {
+        "psr-4": {
+            "BMS\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^8.0",
+        "ext-pdo": "*",
+        "firebase/php-jwt": "^6.0",
+        "vlucas/phpdotenv": "^5.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true
+        }
+    },
+    "audit": {
+        "ignore": ["PKSA-y2cr-5h3j-g3ys"]
+    }
+}

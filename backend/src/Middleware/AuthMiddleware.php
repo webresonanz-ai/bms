@@ -9,7 +9,7 @@ use Firebase\JWT\SignatureInvalidException;
 
 class AuthMiddleware
 {
-    public function handle(callable $next): mixed
+    public function handle(callable $next, ...$params): mixed
     {
         $headers = getallheaders();
         $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
@@ -25,7 +25,7 @@ class AuthMiddleware
         try {
             $decoded = JWT::decode($token, new Key($secret, 'HS256'));
             $GLOBALS['auth_user'] = $decoded;
-            return $next();
+            return $next(...$params);
         } catch (ExpiredException $e) {
             $this->jsonResponse(['error' => 'Token expired'], 401);
         } catch (SignatureInvalidException $e) {

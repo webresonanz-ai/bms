@@ -48,12 +48,37 @@ export const useEventsStore = defineStore('events', () => {
     }
   }
 
+  async function addParticipants(eventId, memberIds) {
+    try {
+      const response = await api.addEventParticipantsBulk(eventId, memberIds)
+      return response
+    } catch (error) {
+      console.error('Failed to add participants:', error)
+      throw error
+    }
+  }
+
+  async function updateEvent(id, data) {
+    try {
+      const response = await api.updateEvent(id, data)
+      const index = events.value.findIndex(e => e.id === id)
+      if (index !== -1) {
+        events.value[index] = response
+      }
+    } catch (error) {
+      console.error('Failed to update event:', error)
+      throw error
+    }
+  }
+
   return {
     events,
     upcomingEvents,
     fetchEvents,
     fetchUpcomingEvents,
     addEvent,
-    deleteEvent
+    deleteEvent,
+    addParticipants,
+    updateEvent
   }
 })

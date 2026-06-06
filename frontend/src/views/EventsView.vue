@@ -77,9 +77,17 @@
                                     <i class="bi bi-clock me-1"></i>{{ event.time }}
                                 </p>
                             </div>
-                            <button class="btn btn-sm btn-outline-danger ms-auto" @click="deleteEvent(event.id)">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                            <div class="d-flex gap-1 ms-auto">
+                                <button class="btn btn-sm btn-outline-secondary" @click="openEditModal(event)" title="Edit event">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary" @click="openParticipantsModal(event)" title="Add participants">
+                                    <i class="bi bi-person-plus"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" @click="deleteEvent(event.id)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -123,20 +131,136 @@
                 </form>
             </div>
         </div>
+
+<!-- Add Participants Modal -->
+<div v-if="showParticipantsModal" class="modal-overlay">
+    <div class="modal-content luxury-card">
+        <h4 class="fw-bold mb-4">Add Participants to "{{ selectedEvent?.title }}"</h4>
+        <form @submit.prevent="addEventParticipants">
+            <div class="mb-3">
+                <div class="row g-2">
+                    <div class="col-7">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="bi bi-search text-white-50"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0" 
+                                v-model="memberSearchQuery" placeholder="Search by name or nickname..." 
+                                style="border-radius: 0 8px 8px 0;">
+                        </div>
+                    </div>
+                    <div class="col-5">
+                        <select class="form-select" v-model="memberSectionFilter">
+                            <option v-for="section in memberSections" :key="section" :value="section">
+                                {{ section === 'all' ? 'All Sections' : section }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Select Members</label>
+                <div class="member-checkbox-list">
+                    <div v-for="member in filteredMembers" :key="member.id" class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" :id="'member-' + member.id"
+                                :value="member.id" v-model="selectedMemberIds">
+                        <label class="form-check-label d-flex align-items-center" :for="'member-' + member.id">
+                            <span class="me-2">
+                                <span v-if="member.nickname" class="text-primary">{{ member.nickname }}</span>
+                                <span v-else>{{ member.name }}</span>
+                                <span v-if="member.nickname" class="text-white-50"> ({{ member.name }})</span>
+                            </span>
+                            <span class="badge bg-secondary">{{ member.section }}</span>
+                        </label>
+                    </div>
+                    <div v-if="filteredMembers.length === 0" class="text-center text-white-50 py-3">
+                        No members found
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-gradient flex-grow-1" :disabled="selectedMemberIds.length === 0">
+                    Add {{ selectedMemberIds.length }} Participant(s)
+                </button>
+                <button type="button" class="btn btn-outline-light"
+                    @click="closeParticipantsModal">Cancel</button>
+            </div>
+        </form>
     </div>
+</div>
+
+         <!-- Edit Event Modal -->
+         <div v-if="showEditModal" class="modal-overlay">
+             <div class="modal-content luxury-card">
+                 <h4 class="fw-bold mb-4">Edit Event</h4>
+                 <form @submit.prevent="updateEvent">
+                     <div class="mb-3">
+                         <label class="form-label">Event Title</label>
+                         <input type="text" class="form-control" v-model="editingEvent.title" required>
+                     </div>
+                     <div class="mb-3">
+                         <label class="form-label">Date</label>
+                         <input type="date" class="form-control" v-model="editingEvent.date" required>
+                     </div>
+                     <div class="mb-3">
+                         <label class="form-label">Time</label>
+                         <input type="time" class="form-control" v-model="editingEvent.time" required>
+                     </div>
+                     <div class="mb-3">
+                         <label class="form-label">Location</label>
+                         <input type="text" class="form-control" v-model="editingEvent.location" required>
+                     </div>
+                     <div class="mb-3">
+                         <label class="form-label">Type</label>
+                         <select class="form-select" v-model="editingEvent.type">
+                             <option value="concert">Concert</option>
+                             <option value="rehearsal">Rehearsal</option>
+                             <option value="performance">Performance</option>
+                         </select>
+                     </div>
+                     <div class="d-flex gap-2">
+                         <button type="submit" class="btn btn-gradient flex-grow-1">Save Changes</button>
+                         <button type="button" class="btn btn-outline-light"
+                             @click="closeEditModal">Cancel</button>
+                     </div>
+                 </form>
+             </div>
+         </div>
+     </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useEventsStore } from '../stores/events'
+import { useMembersStore } from '../stores/members'
+import { api } from '../services/api'
 
 const eventsStore = useEventsStore()
+const membersStore = useMembersStore()
+
 const showAddModal = ref(false)
+const showEditModal = ref(false)
+const showParticipantsModal = ref(false)
+const selectedEvent = ref(null)
+const selectedMemberIds = ref([])
+const memberSearchQuery = ref('')
+const memberSectionFilter = ref('all')
+
+const editingEvent = ref({
+    id: null,
+    title: '',
+    date: '',
+    time: '',
+    location: '',
+    type: 'rehearsal'
+})
+
 const currentMonth = ref(new Date().getMonth())
 const currentYear = ref(new Date().getFullYear())
 
 onMounted(() => {
     eventsStore.fetchUpcomingEvents()
+    membersStore.fetchActiveMembers()
 })
 
 const newEvent = ref({
@@ -198,6 +322,32 @@ const calendarDays = computed(() => {
     return days
 })
 
+const memberSections = computed(() => {
+    const sections = new Set()
+    membersStore.members.forEach(m => {
+        if (m.section) sections.add(m.section)
+    })
+    return ['all', ...Array.from(sections).sort()]
+})
+
+const filteredMembers = computed(() => {
+    let members = membersStore.members
+
+    if (memberSectionFilter.value !== 'all') {
+        members = members.filter(m => m.section === memberSectionFilter.value)
+    }
+
+    if (memberSearchQuery.value) {
+        const query = memberSearchQuery.value.toLowerCase()
+        members = members.filter(m => 
+            (m.name && m.name.toLowerCase().includes(query)) ||
+            (m.nickname && m.nickname.toLowerCase().includes(query))
+        )
+    }
+
+    return members
+})
+
 function previousMonth() {
     if (currentMonth.value === 0) {
         currentMonth.value = 11
@@ -248,6 +398,85 @@ async function deleteEvent(id) {
         } catch (error) {
             alert('Failed to delete event: ' + error.message)
         }
+    }
+}
+
+async function openParticipantsModal(event) {
+    selectedEvent.value = event
+    selectedMemberIds.value = []
+    showParticipantsModal.value = true
+    await fetchExistingParticipants(event.id)
+}
+
+async function fetchExistingParticipants(eventId) {
+    try {
+        const response = await api.getEventParticipants(eventId)
+        const existingIds = response.members?.map(m => m.member_id) || []
+        selectedMemberIds.value = existingIds
+    } catch (error) {
+        console.error('Failed to fetch participants:', error)
+    }
+}
+
+function closeParticipantsModal() {
+    showParticipantsModal.value = false
+    selectedEvent.value = null
+    selectedMemberIds.value = []
+    memberSearchQuery.value = ''
+    memberSectionFilter.value = 'all'
+}
+
+async function addEventParticipants() {
+    if (!selectedEvent.value) return
+
+    try {
+        await eventsStore.addParticipants(selectedEvent.value.id, selectedMemberIds.value)
+        const event = eventsStore.events.find(e => e.id === selectedEvent.value.id)
+        if (event) {
+            event.participants = selectedMemberIds.value.length
+        }
+        closeParticipantsModal()
+    } catch (error) {
+        alert('Failed to add participants: ' + error.message)
+    }
+}
+
+function openEditModal(event) {
+    editingEvent.value = {
+        id: event.id,
+        title: event.title,
+        date: event.date,
+        time: event.time,
+        location: event.location,
+        type: event.type
+    }
+    showEditModal.value = true
+}
+
+function closeEditModal() {
+    showEditModal.value = false
+    editingEvent.value = {
+        id: null,
+        title: '',
+        date: '',
+        time: '',
+        location: '',
+        type: 'rehearsal'
+    }
+}
+
+async function updateEvent() {
+    try {
+        await eventsStore.updateEvent(editingEvent.value.id, {
+            title: editingEvent.value.title,
+            date: editingEvent.value.date,
+            time: editingEvent.value.time,
+            location: editingEvent.value.location,
+            type: editingEvent.value.type
+        })
+        closeEditModal()
+    } catch (error) {
+        alert('Failed to update event: ' + error.message)
     }
 }
 </script>
@@ -396,5 +625,45 @@ async function deleteEvent(id) {
 .form-label {
     color: var(--text-secondary);
     font-weight: 500;
+}
+
+.form-check-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-check-label {
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.member-checkbox-list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.input-group-text {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-secondary);
+}
+
+.input-group .form-control {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.input-group .form-control:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 </style>

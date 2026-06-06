@@ -28,6 +28,11 @@
                 <span>Members</span>
             </router-link>
 
+            <router-link to="/attendance" class="nav-item" active-class="active">
+                <i class="bi bi-check2-circle"></i>
+                <span>Attendance</span>
+            </router-link>
+
             <router-link to="/about" class="nav-item" active-class="active">
                 <i class="bi bi-info-circle-fill"></i>
                 <span>About Us</span>

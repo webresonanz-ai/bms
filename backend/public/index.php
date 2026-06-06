@@ -35,6 +35,13 @@ $router->add('DELETE', '/members/{id}', [new MembersController(), 'destroy'], ['
 $router->add('GET', '/events', [new EventsController(), 'index'], ['cors']);
 $router->add('GET', '/events/upcoming', [new EventsController(), 'upcoming'], ['cors']);
 $router->add('POST', '/events', [new EventsController(), 'store'], ['cors']);
+$router->add('PUT', '/events/{id}', [new EventsController(), 'update'], ['cors']);
 $router->add('DELETE', '/events/{id}', [new EventsController(), 'destroy'], ['cors']);
+$router->add('GET', '/events/{id}/participants', [new EventsController(), 'participants'], ['cors']);
+$router->add('POST', '/events/{id}/participants', [new EventsController(), 'addParticipant'], ['cors']);
+$router->add('POST', '/events/{id}/participants/bulk', [new EventsController(), 'addParticipants'], ['cors']);
+$router->add('GET', '/events/{id}/attendance', [new EventsController(), 'attendance'], ['cors']);
+$router->add('POST', '/events/{id}/attendance', [new EventsController(), 'bulkAttendance'], ['cors']);
+$router->add('PATCH', '/events/{id}/attendance/{memberId}', [new EventsController(), 'setAttendance'], ['cors']);
 
 $router->resolve();

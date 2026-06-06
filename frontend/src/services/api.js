@@ -75,12 +75,41 @@ export const api = {
 
   getUpcomingEvents: () => apiFetch('/events/upcoming'),
 
-  createEvent: (data) => apiFetch('/events', {
+createEvent: (data) => apiFetch('/events', {
     method: 'POST',
     body: JSON.stringify(data)
   }),
 
-  deleteEvent: (id) => apiFetch(`/events/${id}`, {
+   updateEvent: (id, data) => apiFetch(`/events/${id}`, {
+     method: 'PUT',
+     body: JSON.stringify(data)
+   }),
+
+   deleteEvent: (id) => apiFetch(`/events/${id}`, {
     method: 'DELETE'
+  }),
+
+  getEventParticipants: (eventId) => apiFetch(`/events/${eventId}/participants`),
+
+   addEventParticipant: (eventId, memberId) => apiFetch(`/events/${eventId}/participants`, {
+     method: 'POST',
+     body: JSON.stringify({ member_id: memberId })
+   }),
+
+   addEventParticipantsBulk: (eventId, memberIds) => apiFetch(`/events/${eventId}/participants/bulk`, {
+     method: 'POST',
+     body: JSON.stringify({ member_ids: memberIds })
+   }),
+
+  submitAttendance: (eventId, data) => apiFetch(`/events/${eventId}/attendance`, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+
+  getAttendance: (eventId) => apiFetch(`/events/${eventId}/attendance`),
+
+  setAttendance: (eventId, memberId, data) => apiFetch(`/events/${eventId}/attendance/${memberId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data)
   })
 }

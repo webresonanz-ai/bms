@@ -4,7 +4,7 @@ namespace BMS\Middleware;
 
 class CorsMiddleware
 {
-    public function handle(callable $next): mixed
+    public function handle(callable $next, ...$params): mixed
     {
         header('Access-Control-Allow-Origin: http://localhost:5173');
         header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
@@ -16,6 +16,6 @@ class CorsMiddleware
             exit(0);
         }
         
-        return $next();
+        return $next(...$params);
     }
 }

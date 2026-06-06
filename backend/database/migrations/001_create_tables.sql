@@ -68,8 +68,8 @@ INSERT INTO `events` (`title`, `date`, `time`, `location`, `type`, `status`, `pa
 -- Update members table with new columns
 ALTER TABLE `members`
 ADD COLUMN `nickname` varchar(255) DEFAULT NULL AFTER `name`,
-ADD COLUMN `stage_name` varchar(255) DEFAULT NULL AFTER `fullname`,
-ADD COLUMN `birth_place` varchar(255) DEFAULT NULL AFTER `voice_type`,
+ADD COLUMN `stage_name` varchar(255) DEFAULT NULL AFTER `email`,
+ADD COLUMN `birth_place` varchar(255) DEFAULT NULL AFTER `stage_name`,
 ADD COLUMN `birth_date` date DEFAULT NULL AFTER `birth_place`,
 ADD COLUMN `domicile` varchar(255) DEFAULT NULL AFTER `birth_date`,
 ADD COLUMN `year_join` date DEFAULT NULL AFTER `phone`,

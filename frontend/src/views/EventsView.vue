@@ -28,7 +28,7 @@
                             <button class="btn btn-sm btn-outline-earth" @click="previousMonth">
                                 <i class="bi bi-chevron-left"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-earth" @click="currentMonth = new Date().getMonth()">
+                            <button class="btn btn-sm btn-outline-earth" @click="goToToday">
                                 Today
                             </button>
                             <button class="btn btn-sm btn-outline-earth" @click="nextMonth">
@@ -46,7 +46,8 @@
                         </div>
                         <div class="calendar-days">
                             <div v-for="(day, index) in calendarDays" :key="index" class="calendar-day"
-                                :class="{ 'other-month': !day.currentMonth, 'today': day.isToday, 'has-event': day.hasEvent }">
+                                :class="{ 'other-month': !day.currentMonth, 'today': day.isToday, 'has-event': day.hasEvent }"
+                                @click="openDayDetails(day)">
                                 <div class="day-number">{{ day.date }}</div>
                                 <div v-if="day.hasEvent" class="event-indicator"></div>
                             </div>
@@ -63,7 +64,8 @@
                         Upcoming Events
                     </h5>
                     <div class="event-list">
-                        <div v-for="event in eventsStore.upcomingEvents" :key="event.id" class="event-item luxury-event-item" :class="`event-type-${event.type}`">
+                        <div v-for="event in eventsStore.upcomingEvents" :key="event.id"
+                            class="event-item luxury-event-item" :class="`event-type-${event.type}`">
                             <div class="event-date luxury-date-badge">
                                 <span class="date">{{ formatDay(event.date) }}</span>
                                 <span class="month">{{ formatMonth(event.date) }}</span>
@@ -78,10 +80,12 @@
                                 </p>
                             </div>
                             <div class="d-flex gap-1 ms-auto luxury-actions">
-                                <button class="btn btn-sm btn-earth-outline" @click="openEditModal(event)" title="Edit event">
+                                <button class="btn btn-sm btn-earth-outline" @click="openEditModal(event)"
+                                    title="Edit event">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button class="btn btn-sm btn-gold-outline" @click="openParticipantsModal(event)" title="Add participants">
+                                <button class="btn btn-sm btn-gold-outline" @click="openParticipantsModal(event)"
+                                    title="Add participants">
                                     <i class="bi bi-person-plus"></i>
                                 </button>
                                 <button class="btn btn-sm btn-danger-earth" @click="deleteEvent(event.id)">
@@ -93,6 +97,32 @@
                 </div>
             </div>
         </div>
+
+        <Teleport to="body">
+            <div v-if="showCalendarPopup" class="calendar-day-popup-overlay" @click.self="closeDayDetails">
+                <div class="calendar-day-popup">
+                    <div class="calendar-day-popup-header">
+                        <div>
+                            <p class="popup-date-title">Events on {{ formatFullDate(selectedCalendarDate) }}</p>
+                            <p class="popup-date-subtitle">Click outside to close.</p>
+                        </div>
+                        <button type="button" class="btn-close" @click="closeDayDetails"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="popup-events">
+                        <div v-for="event in selectedCalendarEvents" :key="event.id" class="popup-event-item">
+                            <div class="popup-event-header">
+                                <h6 class="popup-event-title">{{ event.title }}</h6>
+                                <span class="badge bg-earth text-white">{{ event.type }}</span>
+                            </div>
+                            <p class="mb-1 text-secondary"><i class="bi bi-geo-alt me-1"></i>{{ event.location }}
+                            </p>
+                            <p class="mb-0 text-secondary"><i class="bi bi-clock me-1"></i>{{ event.time }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
 
         <!-- Add Event Modal -->
         <div v-if="showAddModal" class="modal-overlay">
@@ -132,101 +162,100 @@
             </div>
         </div>
 
-<!-- Add Participants Modal -->
-<div v-if="showParticipantsModal" class="modal-overlay">
-    <div class="modal-content luxury-card">
-        <h4 class="fw-bold mb-4">Add Participants to "{{ selectedEvent?.title }}"</h4>
-        <form @submit.prevent="addEventParticipants">
-            <div class="mb-3">
-                <div class="row g-2">
-                    <div class="col-7">
-                        <div class="input-group">
-                            <span class="input-group-text bg-transparent border-end-0">
-                                <i class="bi bi-search text-white-50"></i>
-                            </span>
-                            <input type="text" class="form-control border-start-0" 
-                                v-model="memberSearchQuery" placeholder="Search by name or nickname..." 
-                                style="border-radius: 0 8px 8px 0;">
+        <!-- Add Participants Modal -->
+        <div v-if="showParticipantsModal" class="modal-overlay">
+            <div class="modal-content luxury-card">
+                <h4 class="fw-bold mb-4">Add Participants to "{{ selectedEvent?.title }}"</h4>
+                <form @submit.prevent="addEventParticipants">
+                    <div class="mb-3">
+                        <div class="row g-2">
+                            <div class="col-7">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0">
+                                        <i class="bi bi-search text-white-50"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" v-model="memberSearchQuery"
+                                        placeholder="Search by name or nickname..." style="border-radius: 0 8px 8px 0;">
+                                </div>
+                            </div>
+                            <div class="col-5">
+                                <select class="form-select" v-model="memberSectionFilter">
+                                    <option v-for="section in memberSections" :key="section" :value="section">
+                                        {{ section === 'all' ? 'All Sections' : section }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-5">
-                        <select class="form-select" v-model="memberSectionFilter">
-                            <option v-for="section in memberSections" :key="section" :value="section">
-                                {{ section === 'all' ? 'All Sections' : section }}
-                            </option>
+                    <div class="mb-3">
+                        <label class="form-label">Select Members</label>
+                        <div class="member-checkbox-list">
+                            <div v-for="member in filteredMembers" :key="member.id" class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" :id="'member-' + member.id"
+                                    :value="member.id" v-model="selectedMemberIds">
+                                <label class="form-check-label d-flex align-items-center" :for="'member-' + member.id">
+                                    <span class="me-2">
+                                        <span v-if="member.nickname" class="text-primary">{{ member.nickname }}</span>
+                                        <span v-else>{{ member.name }}</span>
+                                        <span v-if="member.nickname" class="text-white-50"> ({{ member.name }})</span>
+                                    </span>
+                                    <span class="badge bg-secondary">{{ member.section }}</span>
+                                </label>
+                            </div>
+                            <div v-if="filteredMembers.length === 0" class="text-center text-white-50 py-3">
+                                No members found
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-gradient flex-grow-1"
+                            :disabled="selectedMemberIds.length === 0">
+                            Add {{ selectedMemberIds.length }} Participant(s)
+                        </button>
+                        <button type="button" class="btn btn-earth-outline"
+                            @click="closeParticipantsModal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Event Modal -->
+        <div v-if="showEditModal" class="modal-overlay">
+            <div class="modal-content luxury-card">
+                <h4 class="fw-bold mb-4 luxury-subheading">Edit Event</h4>
+                <form @submit.prevent="updateEvent">
+                    <div class="mb-3">
+                        <label class="form-label">Event Title</label>
+                        <input type="text" class="form-control" v-model="editingEvent.title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-control" v-model="editingEvent.date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Time</label>
+                        <input type="time" class="form-control" v-model="editingEvent.time" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Location</label>
+                        <input type="text" class="form-control" v-model="editingEvent.location" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" v-model="editingEvent.type">
+                            <option value="concert">Concert</option>
+                            <option value="rehearsal">Rehearsal</option>
+                            <option value="performance">Performance</option>
                         </select>
                     </div>
-                </div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Select Members</label>
-                <div class="member-checkbox-list">
-                    <div v-for="member in filteredMembers" :key="member.id" class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" :id="'member-' + member.id"
-                                :value="member.id" v-model="selectedMemberIds">
-                        <label class="form-check-label d-flex align-items-center" :for="'member-' + member.id">
-                            <span class="me-2">
-                                <span v-if="member.nickname" class="text-primary">{{ member.nickname }}</span>
-                                <span v-else>{{ member.name }}</span>
-                                <span v-if="member.nickname" class="text-white-50"> ({{ member.name }})</span>
-                            </span>
-                            <span class="badge bg-secondary">{{ member.section }}</span>
-                        </label>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-gradient flex-grow-1">Save Changes</button>
+                        <button type="button" class="btn btn-earth-outline" @click="closeEditModal">Cancel</button>
                     </div>
-                    <div v-if="filteredMembers.length === 0" class="text-center text-white-50 py-3">
-                        No members found
-                    </div>
-                </div>
+                </form>
             </div>
-<div class="d-flex gap-2">
-                <button type="submit" class="btn btn-gradient flex-grow-1" :disabled="selectedMemberIds.length === 0">
-                    Add {{ selectedMemberIds.length }} Participant(s)
-                </button>
-                <button type="button" class="btn btn-earth-outline"
-                    @click="closeParticipantsModal">Cancel</button>
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-
-<!-- Edit Event Modal -->
-<div v-if="showEditModal" class="modal-overlay">
-    <div class="modal-content luxury-card">
-        <h4 class="fw-bold mb-4 luxury-subheading">Edit Event</h4>
-        <form @submit.prevent="updateEvent">
-            <div class="mb-3">
-                <label class="form-label">Event Title</label>
-                <input type="text" class="form-control" v-model="editingEvent.title" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Date</label>
-                <input type="date" class="form-control" v-model="editingEvent.date" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Time</label>
-                <input type="time" class="form-control" v-model="editingEvent.time" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Location</label>
-                <input type="text" class="form-control" v-model="editingEvent.location" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Type</label>
-                <select class="form-select" v-model="editingEvent.type">
-                    <option value="concert">Concert</option>
-                    <option value="rehearsal">Rehearsal</option>
-                    <option value="performance">Performance</option>
-                </select>
-            </div>
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-gradient flex-grow-1">Save Changes</button>
-                <button type="button" class="btn btn-earth-outline"
-                    @click="closeEditModal">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
-     </div>
 </template>
 
 <script setup>
@@ -272,6 +301,14 @@ const newEvent = ref({
     participants: 0
 })
 
+const selectedCalendarDate = ref('')
+
+const selectedCalendarEvents = computed(() => {
+    if (!selectedCalendarDate.value) return []
+    return eventsStore.events.filter(event => toDateKey(event.date) === selectedCalendarDate.value)
+})
+const showCalendarPopup = computed(() => Boolean(selectedCalendarDate.value && selectedCalendarEvents.value.length > 0))
+
 const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const months = ['January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December']
@@ -284,35 +321,36 @@ const calendarDays = computed(() => {
     const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0)
     const startPadding = firstDay.getDay()
 
-    // Previous month padding
     for (let i = startPadding - 1; i >= 0; i--) {
         const date = new Date(currentYear.value, currentMonth.value, -i)
         days.push({
             date: date.getDate(),
+            dateKey: toDateKey(date),
             currentMonth: false,
             isToday: false,
             hasEvent: false
         })
     }
 
-    // Current month
     const today = new Date()
     for (let i = 1; i <= lastDay.getDate(); i++) {
         const date = new Date(currentYear.value, currentMonth.value, i)
-        const dateString = date.toISOString().split('T')[0]
+        const dateKey = toDateKey(date)
         days.push({
             date: i,
+            dateKey,
             currentMonth: true,
             isToday: date.toDateString() === today.toDateString(),
-            hasEvent: eventsStore.events.some(e => e.date === dateString)
+            hasEvent: eventsStore.events.some(e => toDateKey(e.date) === dateKey)
         })
     }
 
-    // Next month padding
     const endPadding = 42 - days.length
     for (let i = 1; i <= endPadding; i++) {
+        const date = new Date(currentYear.value, currentMonth.value + 1, i)
         days.push({
             date: i,
+            dateKey: toDateKey(date),
             currentMonth: false,
             isToday: false,
             hasEvent: false
@@ -339,7 +377,7 @@ const filteredMembers = computed(() => {
 
     if (memberSearchQuery.value) {
         const query = memberSearchQuery.value.toLowerCase()
-        members = members.filter(m => 
+        members = members.filter(m =>
             (m.name && m.name.toLowerCase().includes(query)) ||
             (m.nickname && m.nickname.toLowerCase().includes(query))
         )
@@ -355,6 +393,7 @@ function previousMonth() {
     } else {
         currentMonth.value--
     }
+    closeDayDetails()
 }
 
 function nextMonth() {
@@ -364,14 +403,71 @@ function nextMonth() {
     } else {
         currentMonth.value++
     }
+    closeDayDetails()
+}
+
+function goToToday() {
+    const now = new Date()
+    currentMonth.value = now.getMonth()
+    currentYear.value = now.getFullYear()
+    closeDayDetails()
+}
+
+function openDayDetails(day) {
+    if (!day.hasEvent) return
+    if (selectedCalendarDate.value === day.dateKey) {
+        closeDayDetails()
+    } else {
+        selectedCalendarDate.value = day.dateKey
+    }
+}
+
+function closeDayDetails() {
+    selectedCalendarDate.value = ''
+}
+
+function pad(value) {
+    return String(value).padStart(2, '0')
+}
+
+function formatFullDate(dateValue) {
+    const date = getLocalDate(dateValue)
+    if (!date || Number.isNaN(date.getTime())) return ''
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+function getLocalDate(dateValue) {
+    if (!dateValue) return null
+
+    if (dateValue instanceof Date) {
+        return dateValue
+    }
+
+    if (typeof dateValue === 'string') {
+        const datePart = dateValue.split('T')[0].split(' ')[0]
+        if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+            const [year, month, day] = datePart.split('-').map(Number)
+            return new Date(year, month - 1, day)
+        }
+    }
+
+    return new Date(dateValue)
+}
+
+function toDateKey(dateValue) {
+    const date = getLocalDate(dateValue)
+    if (!date || Number.isNaN(date.getTime())) return ''
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
 function formatDay(date) {
-    return new Date(date).getDate()
+    const localDate = getLocalDate(date)
+    return localDate ? localDate.getDate() : ''
 }
 
 function formatMonth(date) {
-    return new Date(date).toLocaleDateString('en-US', { month: 'short' })
+    const localDate = getLocalDate(date)
+    return localDate ? localDate.toLocaleDateString('en-US', { month: 'short' }) : ''
 }
 
 async function addNewEvent() {
@@ -482,11 +578,100 @@ async function updateEvent() {
 </script>
 
 <style scoped>
+.calendar-card {
+    position: relative;
+    overflow: visible;
+}
+
 .calendar-grid {
     background: rgba(166, 123, 91, 0.05);
     border-radius: 16px;
     overflow: hidden;
     border: 1px solid rgba(166, 123, 91, 0.15);
+}
+
+.calendar-day-popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(26, 18, 10, 0.7);
+    backdrop-filter: blur(6px);
+    padding: 1rem;
+}
+
+.calendar-day-popup {
+    width: min(520px, 100%);
+    background: #1a110a;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(212, 175, 55, 0.1);
+    max-height: 80vh;
+    overflow-y: auto;
+    color: #fff;
+}
+
+.calendar-day-popup-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.popup-date-title {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.popup-date-subtitle {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.85rem;
+}
+
+.popup-events {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.popup-event-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 0.95rem 1rem;
+    color: #fff;
+}
+
+.popup-event-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.popup-event-title {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #fff;
+}
+
+.btn-close {
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.btn-close:hover {
+    color: #fff;
 }
 
 .calendar-headers,
@@ -523,6 +708,7 @@ async function updateEvent() {
 .calendar-day:hover {
     background: rgba(166, 123, 91, 0.15);
     transform: scale(1.03);
+    z-index: 2;
 }
 
 .calendar-day.other-month {

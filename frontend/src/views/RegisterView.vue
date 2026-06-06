@@ -19,14 +19,6 @@
                     <label class="form-label">Password</label>
                     <input type="password" class="form-control" v-model="form.password" required minlength="6">
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Role</label>
-                    <select class="form-select" v-model="form.role">
-                        <option value="Member">Member</option>
-                        <option value="Music Director">Music Director</option>
-                        <option value="Section Leader">Section Leader</option>
-                    </select>
-                </div>
                 <div class="mb-4">
                     <label class="form-label">Phone (optional)</label>
                     <input type="tel" class="form-control" v-model="form.phone">

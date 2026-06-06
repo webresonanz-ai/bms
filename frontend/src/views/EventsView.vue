@@ -10,7 +10,7 @@
                         </h2>
                         <p class="luxury-subtitle">Manage and view all choir events</p>
                     </div>
-                    <button class="btn btn-gradient luxury-btn" @click="showAddModal = true">
+                    <button v-if="isMusicDirector" class="btn btn-gradient luxury-btn" @click="showAddModal = true">
                         <i class="bi bi-plus-lg me-2"></i>
                         Add Event
                     </button>
@@ -80,15 +80,16 @@
                                 </p>
                             </div>
                             <div class="d-flex gap-1 ms-auto luxury-actions">
-                                <button class="btn btn-sm btn-earth-outline" @click="openEditModal(event)"
-                                    title="Edit event">
+                                <button v-if="isMusicDirector" class="btn btn-sm btn-earth-outline"
+                                    @click="openEditModal(event)" title="Edit event">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button class="btn btn-sm btn-gold-outline" @click="openParticipantsModal(event)"
-                                    title="Add participants">
+                                <button v-if="isMusicDirector || isSectionLeader" class="btn btn-sm btn-gold-outline"
+                                    @click="openParticipantsModal(event)" title="Add participants">
                                     <i class="bi bi-person-plus"></i>
                                 </button>
-                                <button class="btn btn-sm btn-danger-earth" @click="deleteEvent(event.id)">
+                                <button v-if="isMusicDirector" class="btn btn-sm btn-danger-earth"
+                                    @click="deleteEvent(event.id)">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
@@ -106,8 +107,7 @@
                             <p class="popup-date-title">Events on {{ formatFullDate(selectedCalendarDate) }}</p>
                             <p class="popup-date-subtitle">Click outside to close.</p>
                         </div>
-                        <button type="button" class="btn-close" @click="closeDayDetails"
-                            aria-label="Close"></button>
+                        <button type="button" class="btn-close" @click="closeDayDetails" aria-label="Close"></button>
                     </div>
                     <div class="popup-events">
                         <div v-for="event in selectedCalendarEvents" :key="event.id" class="popup-event-item">
@@ -263,9 +263,11 @@ import { ref, computed, onMounted } from 'vue'
 import { useEventsStore } from '../stores/events'
 import { useMembersStore } from '../stores/members'
 import { api } from '../services/api'
+import { useAuthStore } from '../stores/auth'
 
 const eventsStore = useEventsStore()
 const membersStore = useMembersStore()
+const authStore = useAuthStore()
 
 const showAddModal = ref(false)
 const showEditModal = ref(false)
@@ -291,6 +293,10 @@ onMounted(() => {
     eventsStore.fetchUpcomingEvents()
     membersStore.fetchActiveMembers()
 })
+
+const userRole = computed(() => authStore.user?.role || '')
+const isMusicDirector = computed(() => userRole.value === 'Music Director')
+const isSectionLeader = computed(() => userRole.value === 'Section Leader')
 
 const newEvent = ref({
     title: '',
@@ -471,6 +477,10 @@ function formatMonth(date) {
 }
 
 async function addNewEvent() {
+    if (!isMusicDirector.value) {
+        alert('Only the Music Director can add events.')
+        return
+    }
     try {
         await eventsStore.addEvent({ ...newEvent.value })
         showAddModal.value = false
@@ -488,6 +498,10 @@ async function addNewEvent() {
 }
 
 async function deleteEvent(id) {
+    if (!isMusicDirector.value) {
+        alert('Only the Music Director can delete events.')
+        return
+    }
     if (confirm('Are you sure you want to delete this event?')) {
         try {
             await eventsStore.deleteEvent(id)
@@ -498,6 +512,10 @@ async function deleteEvent(id) {
 }
 
 async function openParticipantsModal(event) {
+    if (!(isMusicDirector.value || isSectionLeader.value)) {
+        alert('Only the Music Director or Section Leaders can add participants.')
+        return
+    }
     selectedEvent.value = event
     selectedMemberIds.value = []
     showParticipantsModal.value = true
@@ -524,6 +542,10 @@ function closeParticipantsModal() {
 
 async function addEventParticipants() {
     if (!selectedEvent.value) return
+    if (!(isMusicDirector.value || isSectionLeader.value)) {
+        alert('Only the Music Director or Section Leaders can add participants.')
+        return
+    }
 
     try {
         await eventsStore.addParticipants(selectedEvent.value.id, selectedMemberIds.value)
@@ -538,6 +560,10 @@ async function addEventParticipants() {
 }
 
 function openEditModal(event) {
+    if (!isMusicDirector.value) {
+        alert('Only the Music Director can edit events.')
+        return
+    }
     editingEvent.value = {
         id: event.id,
         title: event.title,
@@ -562,6 +588,10 @@ function closeEditModal() {
 }
 
 async function updateEvent() {
+    if (!isMusicDirector.value) {
+        alert('Only the Music Director can update events.')
+        return
+    }
     try {
         await eventsStore.updateEvent(editingEvent.value.id, {
             title: editingEvent.value.title,

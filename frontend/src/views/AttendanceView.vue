@@ -29,10 +29,18 @@
                             </select>
                         </div>
                         <div class="col-md-3" v-if="selectedEventId">
-                            <button class="btn btn-gradient luxury-btn" @click="openTakeAttendanceModal">
+                            <button v-if="isMusicDirector || isSectionLeader" class="btn btn-gradient luxury-btn"
+                                @click="openTakeAttendanceModal">
                                 <i class="bi bi-clipboard-check me-2"></i>
                                 Take Attendance
                             </button>
+                            <div v-else>
+                                <button class="btn btn-gradient luxury-btn" disabled
+                                    title="Requires Music Director or Section Leader">
+                                    <i class="bi bi-clipboard-check me-2"></i>
+                                    Take Attendance
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -67,17 +75,13 @@
                         </div>
                     </div>
 
-                    <div class="table-responsive">
+                    <div class="table-responsive" style="overflow-x: auto;">
                         <table class="table table-dark table-hover align-middle luxury-table">
                             <thead>
                                 <tr>
                                     <th>#</th>
                                     <th>Member</th>
                                     <th>Section</th>
-                                    <th>Role</th>
-                                    <th>Attendance</th>
-                                    <th>Notes</th>
-                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -88,28 +92,17 @@
                                         <div class="d-flex align-items-center">
                                             <img :src="member.avatar || defaultAvatar" class="avatar-sm me-2" alt="">
                                             <div>
-                                                <div class="fw-semibold luxury-event-title">{{ member.name }}</div>
-                                                <small class="luxury-text-muted">{{ member.email }}</small>
+                                                <div class="fw-semibold luxury-event-title">{{ truncate(member.name, 25)
+                                                    }}</div>
+                                                <small class="luxury-text-muted">{{ truncate(member.email, 35)
+                                                    }}</small>
                                             </div>
                                         </div>
                                     </td>
                                     <td>{{ member.section || member.section_name || '-' }}</td>
-                                    <td>{{ member.role || '-' }}</td>
-                                    <td>
-                                        <span class="badge luxury-badge" :class="attendanceBadgeClass(member)">
-                                            {{ getAttendanceStatus(member) }}
-                                        </span>
-                                    </td>
-                                    <td>{{ member.attendance?.notes || '-' }}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-earth-outline me-1"
-                                            @click="openRecordModal(member)">
-                                            <i class="bi bi-pencil"></i> Record
-                                        </button>
-                                    </td>
                                 </tr>
                                 <tr v-if="!attendanceStore.filteredParticipants.length">
-                                    <td colspan="7" class="text-center luxury-text-muted py-4">No members found for this
+                                    <td colspan="3" class="text-center luxury-text-muted py-4">No members found for this
                                         event.</td>
                                 </tr>
                             </tbody>
@@ -123,7 +116,12 @@
                             <button class="btn btn-earth-outline btn-sm" @click="attendanceStore.resetFilters()">
                                 <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
                             </button>
-                            <button class="btn btn-gradient btn-sm luxury-btn-sm" @click="openTakeAttendanceModal">
+                            <button v-if="isMusicDirector || isSectionLeader"
+                                class="btn btn-gradient btn-sm luxury-btn-sm" @click="openTakeAttendanceModal">
+                                <i class="bi bi-clipboard-check me-1"></i> Take Attendance
+                            </button>
+                            <button v-else class="btn btn-gradient btn-sm luxury-btn-sm" disabled
+                                title="Requires Music Director or Section Leader">
                                 <i class="bi bi-clipboard-check me-1"></i> Take Attendance
                             </button>
                         </div>
@@ -150,7 +148,7 @@
                     Take Attendance
                 </h4>
                 <p class="luxury-text-muted mb-4">Mark attendance for all members in <strong>{{ selectedEvent?.title
-                }}</strong></p>
+                        }}</strong></p>
 
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
@@ -164,7 +162,7 @@
                     <input type="text" class="form-control" v-model="searchMember" placeholder="Type member name...">
                 </div>
 
-                <div class="table-responsive" style="max-height: 50vh; overflow-y: auto;">
+                <div class="table-responsive" style="max-height: 50vh; overflow-y: auto; overflow-x: auto;">
                     <table class="table table-dark table-hover align-middle">
                         <thead>
                             <tr>
@@ -261,9 +259,11 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useEventsStore } from '../stores/events'
 import { useAttendanceStore } from '../stores/attendance'
+import { useAuthStore } from '../stores/auth'
 
 const eventsStore = useEventsStore()
 const attendanceStore = useAttendanceStore()
+const authStore = useAuthStore()
 
 const selectedEventId = ref('')
 const showTakeModal = ref(false)
@@ -273,6 +273,10 @@ const submitting = ref(false)
 
 const sectionFilter = ref('All')
 const statusFilter = ref('All')
+
+const userRole = computed(() => authStore.user?.role || '')
+const isMusicDirector = computed(() => userRole.value === 'Music Director')
+const isSectionLeader = computed(() => userRole.value === 'Section Leader')
 
 const selectedMember = ref(null)
 const recordForm = ref({
@@ -296,6 +300,13 @@ const filteredTakeList = computed(() => {
     const q = searchMember.value.toLowerCase()
     return list.filter(p => (p.name || '').toLowerCase().includes(q))
 })
+
+function truncate(value, max) {
+    if (!value) return '-'
+    const string = String(value)
+    if (string.length <= max) return string
+    return string.slice(0, max - 1) + '…'
+}
 
 function formatDate(date) {
     if (!date) return '-'
@@ -377,6 +388,10 @@ function applyLocalFilters() {
 }
 
 function openTakeAttendanceModal() {
+    if (!(isMusicDirector.value || isSectionLeader.value)) {
+        alert('Only the Music Director or Section Leaders can take attendance.')
+        return
+    }
     if (!selectedEventId.value) return
     selectedAttendanceDate.value = todayDate.value
     takeList.value = {}
@@ -433,6 +448,10 @@ function markPresent(member) {
 }
 
 async function submitTakeAttendance() {
+    if (!(isMusicDirector.value || isSectionLeader.value)) {
+        alert('Only the Music Director or Section Leaders can submit attendance.')
+        return
+    }
     try {
         submitting.value = true
         const selectedDate = getDateFromInput(selectedAttendanceDate.value)

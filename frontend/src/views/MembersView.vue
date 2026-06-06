@@ -10,10 +10,23 @@
                         </h2>
                         <p class="luxury-subtitle">Manage active members and sections</p>
                     </div>
-                    <button class="btn btn-gradient luxury-btn" @click="showAddModal = true">
+                    <button v-if="isMusicDirector" class="btn btn-gradient luxury-btn" @click="showAddModal = true">
                         <i class="bi bi-person-plus me-2"></i>
                         Add Member
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search + Section Overview -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0">
+                        <i class="bi bi-search text-white-50"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0" v-model="memberSearchQuery"
+                        placeholder="Search by name or nickname..." style="border-radius: 0 8px 8px 0;">
                 </div>
             </div>
         </div>
@@ -45,7 +58,8 @@
                             <h5 class="mb-1 luxury-event-title">{{ member.name }}</h5>
                             <p class="mb-0 luxury-text-muted">{{ member.role }}</p>
                         </div>
-                        <span class="badge ms-auto badge-section" :class="member.status === 'active' ? 'badge-active' : 'badge-inactive'">
+                        <span class="badge ms-auto badge-section"
+                            :class="member.status === 'active' ? 'badge-active' : 'badge-inactive'">
                             {{ member.status }}
                         </span>
                     </div>
@@ -57,7 +71,7 @@
                         </div>
                         <div class="detail-item">
                             <i class="bi bi-telephone text-gold"></i>
-                            <span>{{ member.phone }}</span>
+                            <span>{{ displayPhone(member.phone) }}</span>
                         </div>
                         <div class="detail-item">
                             <i class="bi bi-calendar-check text-gold"></i>
@@ -82,10 +96,12 @@
                         <button class="btn btn-sm btn-earth-outline me-2" @click="viewMemberDetails(member)">
                             <i class="bi bi-eye me-1"></i>View
                         </button>
-                        <button class="btn btn-sm btn-gold-outline me-2" @click="editMember(member)">
+                        <button v-if="isMusicDirector" class="btn btn-sm btn-gold-outline me-2"
+                            @click="editMember(member)">
                             <i class="bi bi-pencil me-1"></i>Edit
                         </button>
-                        <button class="btn btn-sm btn-danger-earth" @click="deactivateMember(member.id)">
+                        <button v-if="isMusicDirector" class="btn btn-sm btn-danger-earth"
+                            @click="deactivateMember(member.id)">
                             <i class="bi bi-person-x"></i>
                         </button>
                     </div>
@@ -141,7 +157,8 @@
                         <div>
                             <h4 class="fw-bold mb-1 luxury-subheading">{{ viewingMember.name }}</h4>
                             <p class="luxury-text-muted mb-0">{{ viewingMember.role }}</p>
-                            <span class="badge mt-2 badge-section" :class="viewingMember.status === 'active' ? 'badge-active' : 'badge-inactive'">
+                            <span class="badge mt-2 badge-section"
+                                :class="viewingMember.status === 'active' ? 'badge-active' : 'badge-inactive'">
                                 {{ viewingMember.status }}
                             </span>
                         </div>
@@ -173,7 +190,7 @@
                     <div class="col-md-6">
                         <div class="detail-card luxury-detail-card">
                             <small class="luxury-text-muted">Phone</small>
-                            <p class="mb-0 fw-semibold luxury-event-title">{{ viewingMember.phone || '-' }}</p>
+                            <p class="mb-0 fw-semibold luxury-event-title">{{ displayPhone(viewingMember.phone) }}</p>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -185,7 +202,8 @@
                     <div class="col-md-6">
                         <div class="detail-card luxury-detail-card">
                             <small class="luxury-text-muted">Birth Date</small>
-                            <p class="mb-0 fw-semibold luxury-event-title">{{ formatDate(viewingMember.birth_date) }}</p>
+                            <p class="mb-0 fw-semibold luxury-event-title">{{ formatDate(viewingMember.birth_date) }}
+                            </p>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -227,7 +245,8 @@
                 </div>
 
                 <div class="d-flex gap-2 mt-4">
-                    <button class="btn btn-gradient flex-grow-1" @click="editMember(viewingMember)">
+                    <button v-if="isMusicDirector" class="btn btn-gradient flex-grow-1"
+                        @click="editMember(viewingMember)">
                         <i class="bi bi-pencil me-2"></i>Edit Member
                     </button>
                     <button class="btn btn-earth-outline" @click="showViewModal = false">Close</button>
@@ -318,7 +337,8 @@
                         <button type="submit" class="btn btn-gradient flex-grow-1">
                             <i class="bi bi-check-lg me-2"></i>Save Changes
                         </button>
-                        <button type="button" class="btn btn-earth-outline" @click="showEditModal = false">Cancel</button>
+                        <button type="button" class="btn btn-earth-outline"
+                            @click="showEditModal = false">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -330,14 +350,17 @@
 import { ref, computed, onMounted } from 'vue'
 import { useMembersStore } from '../stores/members'
 import { api } from '../services/api'
+import { useAuthStore } from '../stores/auth'
 
 const membersStore = useMembersStore()
+const authStore = useAuthStore()
 const showAddModal = ref(false)
 const showViewModal = ref(false)
 const showEditModal = ref(false)
 const selectedSection = ref(null)
 const viewingMember = ref({})
 const editingMember = ref({})
+const memberSearchQuery = ref('')
 const newMember = ref({
     name: '',
     nickname: '',
@@ -361,15 +384,38 @@ const newMember = ref({
 const membersBySection = computed(() => membersStore.membersBySection)
 
 const filteredMembers = computed(() => {
-    if (!selectedSection.value) return membersStore.members
-    return membersStore.members.filter(m => m.section === selectedSection.value)
+    let members = membersStore.members || []
+    if (selectedSection.value) {
+        members = members.filter(m => m.section === selectedSection.value)
+    }
+    if (memberSearchQuery.value) {
+        const q = memberSearchQuery.value.toLowerCase()
+        members = members.filter(m => (m.name && m.name.toLowerCase().includes(q)) || (m.nickname && m.nickname.toLowerCase().includes(q)))
+    }
+    return members
 })
 
 onMounted(() => {
     membersStore.fetchMembers()
 })
 
+const userRole = computed(() => authStore.user?.role || '')
+const isMusicDirector = computed(() => userRole.value === 'Music Director')
+const isSectionLeader = computed(() => userRole.value === 'Section Leader')
+
+function displayPhone(phone) {
+    if (!phone) return '-'
+    if (isMusicDirector.value || isSectionLeader.value) return phone
+    const digits = String(phone).replace(/\D/g, '')
+    const last4 = digits.slice(-4)
+    return `***${last4}`
+}
+
 async function addNewMember() {
+    if (!isMusicDirector.value) {
+        alert('Only the Music Director can add members.')
+        return
+    }
     try {
         await membersStore.addMember({ ...newMember.value })
         showAddModal.value = false
@@ -398,6 +444,10 @@ async function addNewMember() {
 }
 
 async function deactivateMember(id) {
+    if (!isMusicDirector.value) {
+        alert('Only the Music Director can remove or deactivate members.')
+        return
+    }
     if (confirm('Are you sure you want to deactivate this member?')) {
         try {
             await membersStore.updateMemberStatus(id, 'inactive')
@@ -413,12 +463,20 @@ function viewMemberDetails(member) {
 }
 
 function editMember(member) {
+    if (!isMusicDirector.value) {
+        alert('Only the Music Director can edit members.')
+        return
+    }
     showViewModal.value = false
     editingMember.value = { ...member }
     showEditModal.value = true
 }
 
 async function saveMember() {
+    if (!isMusicDirector.value) {
+        alert('Only the Music Director can save member changes.')
+        return
+    }
     try {
         const updateData = { ...editingMember.value }
         if ('joinDate' in updateData) {

@@ -77,6 +77,91 @@ class MembersController
         $this->jsonResponse($this->formatMember($member));
     }
 
+    public function import(): void
+    {
+        if (!isset($_FILES['excel']) || $_FILES['excel']['error'] !== UPLOAD_ERR_OK) {
+            $this->jsonResponse(['error' => 'Excel file is required'], 400);
+            return;
+        }
+
+        $filePath = $_FILES['excel']['tmp_name'];
+
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+        } catch (\Throwable $e) {
+            $this->jsonResponse(['error' => 'Invalid Excel file: ' . $e->getMessage()], 400);
+            return;
+        }
+
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+
+        if (count($rows) < 2) {
+            $this->jsonResponse(['error' => 'Excel file is empty'], 400);
+            return;
+        }
+
+        $header = array_map(fn($h) => strtolower(trim((string)$h)), $rows[0]);
+        $allowed = ['name', 'nickname', 'email', 'stage_name', 'birth_place', 'birth_date', 'domicile', 'phone', 'year_join', 'field_of_work', 'role', 'section', 'join_date', 'status', 'performances', 'avatar'];
+        $header = array_intersect($header, $allowed);
+
+        if (empty($header) || !in_array('name', $header) || !in_array('email', $header)) {
+            $this->jsonResponse(['error' => 'Excel must contain at least name and email columns'], 400);
+            return;
+        }
+
+        $inserted = 0;
+        $skipped = 0;
+        $skippedList = [];
+
+        for ($i = 1; $i < count($rows); $i++) {
+            $row = $rows[$i];
+            if (empty($row[array_search('name', $header)]) && empty($row[array_search('email', $header)])) {
+                continue;
+            }
+
+            $data = [];
+            foreach ($header as $col) {
+                $idx = array_search($col, $header);
+                $data[$col] = $row[$idx] ?? null;
+            }
+
+            foreach (['join_date', 'birth_date', 'year_join'] as $dateField) {
+                if (!empty($data[$dateField])) {
+                    $data[$dateField] = $this->parseExcelDate($data[$dateField]);
+                }
+            }
+
+            $data['status'] = !empty($data['status']) ? $data['status'] : 'active';
+            $data['performances'] = !empty($data['performances']) ? (int)$data['performances'] : 0;
+            if (empty($data['join_date'])) {
+                $data['join_date'] = date('Y-m-d');
+            }
+
+            $existing = $this->memberModel->findByEmail($data['email'] ?? '');
+            if ($existing) {
+                $skipped++;
+                $skippedList[] = [
+                    'row' => $i + 1,
+                    'name' => $data['name'] ?? null,
+                    'email' => $data['email'] ?? null,
+                    'reason' => 'Duplicate email'
+                ];
+                continue;
+            }
+
+            $this->memberModel->create($data);
+            $inserted++;
+        }
+
+        $this->jsonResponse([
+            'message' => 'Import completed',
+            'inserted' => $inserted,
+            'skipped' => $skipped,
+            'skipped_list' => $skippedList
+        ]);
+    }
+
     public function destroy(int $id): void
     {
         $this->memberModel->delete($id);
@@ -117,5 +202,17 @@ class MembersController
         header('Content-Type: application/json');
         echo json_encode($data);
         exit;
+    }
+
+    private function parseExcelDate(string $value): ?string
+    {
+        $value = trim($value);
+        if (empty($value)) return null;
+        try {
+            $dt = new \DateTime($value);
+            return $dt->format('Y-m-d');
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 }

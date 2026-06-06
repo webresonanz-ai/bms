@@ -41,6 +41,13 @@ class Member extends Model
         return $this->update($id, ['status' => $status]);
     }
 
+    public function findByEmail(string $email): ?array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE email = ? LIMIT 1");
+        $stmt->execute([$email]);
+        return $stmt->fetch() ?: null;
+    }
+
     public function getActive(): array
     {
         $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE status = 'active'");

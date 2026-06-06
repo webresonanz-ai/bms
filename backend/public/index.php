@@ -27,6 +27,7 @@ $router->add('GET', '/members', [new MembersController(), 'index'], ['cors']);
 $router->add('GET', '/members/active', [new MembersController(), 'active'], ['cors']);
 $router->add('GET', '/members/section', [new MembersController(), 'bySection'], ['cors']);
 $router->add('POST', '/members', [new MembersController(), 'store'], ['cors']);
+$router->add('POST', '/members/import', [new MembersController(), 'import'], ['cors']);
 $router->add('PATCH', '/members/{id}/status', [new MembersController(), 'updateStatus'], ['cors']);
 $router->add('DELETE', '/members/{id}', [new MembersController(), 'destroy'], ['cors']);
 

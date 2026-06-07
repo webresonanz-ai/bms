@@ -139,6 +139,58 @@ const closeSidebar = () => {
     }
 }
 
+@media (max-width: 576px) {
+    .logo-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .logo-icon i {
+        font-size: 1.25rem !important;
+    }
+
+    .sidebar-header h5 {
+        font-size: 1.1rem;
+    }
+
+    .nav-item {
+        padding: 0.75rem 1rem;
+    }
+
+    .nav-item i {
+        font-size: 1.1rem;
+        margin-right: 0.75rem;
+    }
+
+    .avatar {
+        width: 35px;
+        height: 35px;
+    }
+
+    .user-card {
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .logo-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .sidebar-nav {
+        padding: 0.75rem;
+    }
+
+    .nav-item {
+        padding: 0.6rem 0.75rem;
+    }
+
+    .user-card {
+        padding: 0.4rem;
+    }
+}
+
 .logo-icon {
     width: 45px;
     height: 45px;
@@ -211,6 +263,8 @@ const closeSidebar = () => {
     margin-right: 0.75rem;
     border: 2px solid var(--primary-color);
     box-shadow: 0 4px 12px rgba(166, 123, 91, 0.2);
+    object-fit: cover;
+    object-position: center;
 }
 
 .luxury-heading {

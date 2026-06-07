@@ -244,10 +244,74 @@ const formatDate = (date) => {
 }
 
 .luxury-text-muted {
-    color: var(--text-secondary);
+  color: var(--text-secondary);
 }
 
 .luxury-event-title {
-    color: var(--text-primary);
+  color: var(--text-primary);
+}
+
+@media (max-width: 576px) {
+  .chart-placeholder {
+    height: 200px;
+    border-radius: 12px;
+  }
+
+  .chart-placeholder .display-4 {
+    font-size: 2.5rem !important;
+  }
+
+  .activity-item {
+    padding: 0.75rem 0;
+  }
+
+  .activity-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .luxury-btn-sm {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .luxury-table thead th {
+    font-size: 0.7rem;
+    padding: 0.5rem;
+  }
+
+  .luxury-table tbody td {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.85rem;
+  }
+
+  .luxury-table .bi {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .chart-placeholder {
+    height: 150px;
+  }
+
+  .chart-placeholder .display-4 {
+    font-size: 2rem !important;
+  }
+
+  .luxury-btn-sm {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .luxury-table thead th {
+    font-size: 0.65rem;
+    padding: 0.4rem;
+  }
+
+  .luxury-table tbody td {
+    padding: 0.4rem 0.2rem;
+    font-size: 0.8rem;
+  }
 }
 </style>

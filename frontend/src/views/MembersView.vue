@@ -540,6 +540,8 @@ function formatDate(date) {
     border-radius: 50%;
     border: 3px solid var(--primary-color);
     box-shadow: 0 4px 12px rgba(166, 123, 91, 0.3);
+    object-fit: cover;
+    object-position: center;
 }
 
 .member-details {
@@ -625,13 +627,11 @@ function formatDate(date) {
     box-shadow: 0 0 0 0.25rem rgba(166, 123, 91, 0.25);
 }
 
-.member-avatar-lg {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 3px solid var(--primary-color);
-    object-fit: cover;
-    box-shadow: 0 6px 16px rgba(166, 123, 91, 0.3);
+.luxury-detail-card {
+    background: rgba(166, 123, 91, 0.05);
+    border: 1px solid rgba(166, 123, 91, 0.1);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
 }
 
 .luxury-detail-card {
@@ -644,6 +644,16 @@ function formatDate(date) {
 .luxury-detail-card p {
     color: var(--text-primary);
     margin-top: 0.25rem;
+}
+
+.member-avatar-lg {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--primary-color);
+    object-fit: cover;
+    object-position: center;
+    box-shadow: 0 6px 16px rgba(166, 123, 91, 0.3);
 }
 
 .badge-active {
@@ -664,5 +674,90 @@ function formatDate(date) {
 
 .luxury-event-title {
     color: var(--text-primary);
+}
+
+@media (max-width: 576px) {
+    .section-card {
+        padding: 1rem;
+    }
+
+    .section-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .member-avatar {
+        width: 48px;
+        height: 48px;
+    }
+
+    .member-card.luxury-card {
+        padding: 1rem;
+    }
+
+    .member-details {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+    }
+
+    .detail-item {
+        font-size: 0.85rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .member-stats {
+        padding: 0.75rem;
+    }
+
+    .member-stats h4 {
+        font-size: 1rem;
+    }
+
+    .member-actions .btn {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .modal-content {
+        max-width: 95vw;
+    }
+
+    .member-avatar-lg {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+@media (max-width: 400px) {
+    .section-card {
+        padding: 0.75rem;
+    }
+
+    .section-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .member-avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    .member-card.luxury-card {
+        padding: 0.75rem;
+    }
+
+    .detail-item {
+        font-size: 0.8rem;
+    }
+
+    .member-stats h4 {
+        font-size: 0.9rem;
+    }
+
+    .luxury-btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+    }
 }
 </style>

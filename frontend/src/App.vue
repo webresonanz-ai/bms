@@ -80,18 +80,55 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
-  .main-content {
-    margin-left: 0;
-  }
+   .main-content {
+     margin-left: 0;
+   }
 
-  .content-area {
-    padding: 1rem;
-  }
+   .content-area {
+     padding: 1rem;
+   }
+}
+
+@media (max-width: 576px) {
+   .content-area {
+     padding: 0.75rem;
+   }
+
+   h2.luxury-heading {
+     font-size: 1.5rem;
+   }
+
+   h5.luxury-subheading {
+     font-size: 1.1rem;
+   }
+
+   .row.g-4 {
+     --bs-gutter-x: 1rem;
+     --bs-gutter-y: 1rem;
+   }
+
+   .row.g-3 {
+     --bs-gutter-x: 0.75rem;
+     --bs-gutter-y: 0.75rem;
+   }
 }
 
 @media (max-width: 400px) {
-  .content-area {
-    padding: 0.75rem;
-  }
+   .content-area {
+     padding: 0.5rem;
+   }
+
+   h2.luxury-heading {
+     font-size: 1.25rem;
+   }
+
+   h5.luxury-subheading {
+     font-size: 1rem;
+   }
+
+   .row.g-4 {
+     --bs-gutter-x: 0.5rem;
+     --bs-gutter-y: 0.5rem;
+   }
 }
 </style>

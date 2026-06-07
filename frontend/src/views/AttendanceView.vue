@@ -647,6 +647,7 @@ onMounted(() => {
     height: 36px;
     border-radius: 50%;
     object-fit: cover;
+    object-position: center;
     border: 2px solid var(--primary-color);
 }
 
@@ -655,6 +656,7 @@ onMounted(() => {
     height: 28px;
     border-radius: 50%;
     object-fit: cover;
+    object-position: center;
     border: 1px solid var(--primary-color);
 }
 
@@ -694,10 +696,6 @@ onMounted(() => {
     font-size: 0.8rem;
 }
 
-.luxury-text-muted {
-    color: var(--text-secondary);
-}
-
 .luxury-event-title {
     color: var(--text-primary);
 }
@@ -712,5 +710,77 @@ onMounted(() => {
 
 .luxury-subheading {
     color: var(--text-primary);
+}
+
+@media (max-width: 576px) {
+    .luxury-card {
+        padding: 1rem;
+    }
+
+    .attendance-card .row.g-3 {
+        --bs-gutter-x: 0.75rem;
+        --bs-gutter-y: 0.75rem;
+    }
+
+    .btn-gradient.luxury-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+    }
+
+    .avatar-xs {
+        width: 22px;
+        height: 22px;
+    }
+
+    .table-dark td,
+    .table-dark th {
+        padding: 0.4rem 0.2rem;
+        font-size: 0.8rem;
+    }
+
+    .luxury-table tbody tr:hover {
+        transform: none;
+    }
+
+    .modal-content {
+        max-width: 95vw;
+    }
+}
+
+@media (max-width: 400px) {
+    .luxury-card {
+        padding: 0.75rem;
+    }
+
+    .attendance-card .row.g-3 {
+        --bs-gutter-x: 0.5rem;
+        --bs-gutter-y: 0.5rem;
+    }
+
+    .btn-gradient.luxury-btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .table-dark td,
+    .table-dark th {
+        padding: 0.3rem 0.1rem;
+        font-size: 0.75rem;
+    }
+
+    .avatar-sm {
+        width: 28px;
+        height: 28px;
+    }
+
+    .avatar-xs {
+        width: 20px;
+        height: 20px;
+    }
 }
 </style>

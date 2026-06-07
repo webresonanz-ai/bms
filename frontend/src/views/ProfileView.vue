@@ -198,6 +198,8 @@ async function saveProfile() {
     height: 120px;
     border-radius: 50%;
     border: 4px solid var(--primary-color);
+    object-fit: cover;
+    object-position: center;
     box-shadow: 0 8px 25px rgba(166, 123, 91, 0.3);
 }
 
@@ -271,5 +273,64 @@ async function saveProfile() {
 
 .luxury-event-title {
     color: var(--text-primary);
+}
+
+@media (max-width: 576px) {
+    .profile-avatar {
+        width: 90px;
+        height: 90px;
+    }
+
+    .luxury-card.text-center {
+        padding: 1rem;
+    }
+
+    .luxury-card.text-center h3 {
+        font-size: 1.3rem;
+    }
+
+    .info-item {
+        padding: 0.5rem 0;
+        font-size: 0.9rem;
+    }
+
+    .info-item i {
+        font-size: 1rem;
+    }
+
+    .activity-stat {
+        padding: 0.75rem;
+    }
+
+    .activity-stat i {
+        font-size: 1.5rem;
+    }
+
+    .activity-stat h5 {
+        font-size: 1.1rem;
+    }
+
+    .activity-stat small {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .profile-avatar {
+        width: 70px;
+        height: 70px;
+    }
+
+    .luxury-card.text-center h3 {
+        font-size: 1.1rem;
+    }
+
+    .luxury-card h4 {
+        font-size: 1.1rem;
+    }
+
+    .info-item {
+        font-size: 0.85rem;
+    }
 }
 </style>

@@ -140,6 +140,8 @@ const clearAutoHideTimeout = () => {
     height: 35px;
     border-radius: 50%;
     border: 2px solid var(--primary-color);
+    object-fit: cover;
+    object-position: center;
 }
 
 .notification-badge {
@@ -201,5 +203,27 @@ const clearAutoHideTimeout = () => {
 .dropdown-menu:not(.show) {
     opacity: 0;
     pointer-events: none;
+}
+
+@media (max-width: 576px) {
+    .sidebar-toggle i {
+        font-size: 1.25rem !important;
+    }
+
+    .navbar-nav .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .sidebar-toggle i {
+        font-size: 1.1rem !important;
+    }
+
+    .nav-avatar {
+        width: 30px;
+        height: 30px;
+    }
 }
 </style>

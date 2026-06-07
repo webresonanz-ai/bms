@@ -939,4 +939,93 @@ async function updateEvent() {
     color: var(--text-primary);
     box-shadow: 0 0 0 0.25rem rgba(166, 123, 91, 0.25);
 }
+
+@media (max-width: 576px) {
+    .calendar-day-popup {
+        padding: 1.25rem;
+        max-height: 75vh;
+    }
+
+    .calendar-day-popup-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .popup-date-title {
+        font-size: 0.9rem;
+    }
+
+    .popup-date-subtitle {
+        font-size: 0.75rem;
+    }
+
+    .calendar-grid {
+        border-radius: 12px;
+    }
+
+    .calendar-header {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.75rem;
+    }
+
+    .calendar-day {
+        padding: 0.4rem 0.2rem;
+        min-height: 60px;
+        font-size: 0.8rem;
+    }
+
+    .calendar-day.today .day-number {
+        width: 24px;
+        height: 24px;
+        font-size: 0.8rem;
+    }
+
+    .event-item {
+        padding: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .event-date {
+        min-width: 45px;
+    }
+
+    .event-details {
+        min-width: 100px;
+        margin-top: 0.5rem;
+    }
+
+    .luxury-actions {
+        margin-left: 0 !important;
+        margin-top: 0.5rem;
+    }
+
+    .luxury-actions .btn {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .calendar-day {
+        min-height: 50px;
+        font-size: 0.75rem;
+    }
+
+    .calendar-header {
+        padding: 0.4rem 0.1rem;
+        font-size: 0.65rem;
+    }
+
+    .event-item {
+        padding: 0.5rem;
+    }
+
+    .event-details h6 {
+        font-size: 0.9rem;
+    }
+
+    .luxury-text-muted.small {
+        font-size: 0.7rem;
+    }
+}
 </style>

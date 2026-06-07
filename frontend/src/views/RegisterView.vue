@@ -78,6 +78,32 @@
 .luxury-link:hover {
     color: var(--gold-text);
 }
+
+@media (max-width: 576px) {
+    .register-card {
+        padding: 1.5rem;
+        max-width: 90vw;
+    }
+
+    .luxury-heading {
+        font-size: 1.5rem;
+    }
+
+    .luxury-subtitle {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .register-card {
+        padding: 1rem;
+        max-width: 95vw;
+    }
+
+    .luxury-heading {
+        font-size: 1.3rem;
+    }
+}
 </style>
 
 <script setup>

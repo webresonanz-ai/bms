@@ -89,9 +89,9 @@
                                             <div>
                                                 <div class="fw-semibold luxury-event-title">{{
                                                     truncate(getDisplayName(member), 25)
-                                                    }}</div>
-                                                <small class="luxury-text-muted">{{ truncate(member.email, 35)
-                                                    }}</small>
+                                                }}</div>
+                                                <small class="luxury-text-muted">{{ truncate(member.phone, 35)
+                                                }}</small>
                                             </div>
                                         </div>
                                     </td>
@@ -149,7 +149,7 @@
                     Take Attendance
                 </h4>
                 <p class="luxury-text-muted mb-4">Mark attendance for all members in <strong>{{ selectedEvent?.title
-                        }}</strong></p>
+                }}</strong></p>
 
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
@@ -303,16 +303,16 @@ const filteredTakeList = computed(() => {
     if (!searchMember.value) return list
     const q = searchMember.value.toLowerCase()
     return list.filter(p => {
-        const name = (p.name || '').toLowerCase()
+        const name = (p.stage_name || '').toLowerCase()
         const nickname = ((p.nickname || p.nick) || '').toLowerCase()
         return name.includes(q) || nickname.includes(q)
     })
 })
 
 function getDisplayName(member) {
-    const name = member?.name || ''
+    const name = member?.stage_name || ''
     const nickname = member?.nickname || member?.nick || ''
-    if (nickname) return `(${nickname}) ${name}`
+    if (nickname) return `${nickname} (${name})`
     return name || '-'
 }
 

@@ -51,7 +51,7 @@ class Attendance extends Model
     public function getByEventId(int $eventId): array
     {
         $stmt = $this->db->prepare("
-            SELECT a.*, m.id as member_id, m.name, m.email, m.role, m.section, m.avatar
+            SELECT a.*, m.id as member_id, m.name, m.email, m.role, m.section, m.avatar, m.phone, m.stage_name
             FROM {$this->table} a
             JOIN members m ON m.id = a.member_id
             WHERE a.event_id = ?

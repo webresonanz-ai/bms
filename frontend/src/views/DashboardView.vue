@@ -165,7 +165,7 @@ const previousYearGrowth = computed(() => {
     const totalActiveMembers = membersStore.activeMembers.length;
     const totalCurrentYearMembers = membersStore.membersCurrentYear.length;
     const growth = totalActiveMembers > 0 ? (totalCurrentYearMembers / totalActiveMembers) * 100 : 0;
-    return growth.toFixed(1);
+    return "+" + growth.toFixed(1);
 });
 
 const recentActivities = [

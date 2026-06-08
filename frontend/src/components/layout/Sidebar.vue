@@ -4,11 +4,10 @@
             <div class="d-flex align-items-center justify-content-between w-100">
                 <div class="d-flex align-items-center">
                     <div class="logo-icon me-3">
-                        <i class="bi bi-music-note-beamed fs-2"></i>
+                        <img src="/bms_white.png" alt="BMS Logo" class="w-100 h-100">
                     </div>
                     <div class="sidebar-text">
                         <h5 class="mb-0 fw-bold luxury-heading">BMS</h5>
-                        <small class="luxury-text-muted">Management System</small>
                     </div>
                 </div>
                 <button class="btn btn-sm btn-earth-outline sidebar-collapse-btn d-none d-md-block"
@@ -194,7 +193,6 @@ const closeSidebar = () => {
 .logo-icon {
     width: 45px;
     height: 45px;
-    background: var(--primary-gradient);
     border-radius: 14px;
     display: flex;
     align-items: center;

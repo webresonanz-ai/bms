@@ -4,6 +4,7 @@ import { api } from '../services/api'
 
 export const useMembersStore = defineStore('members', () => {
   const members = ref([])
+  const membersCurrentYear = ref([])
 
   const activeMembers = computed(() =>
     members.value.filter(member => member.status === 'active')
@@ -35,6 +36,15 @@ export const useMembersStore = defineStore('members', () => {
       members.value = response
     } catch (error) {
       console.error('Failed to fetch active members:', error)
+    }
+  }
+
+  async function fetchActiveCurrentYearMembers() {
+    try {
+      const response = await api.getActiveCurrentYearMembers()
+      membersCurrentYear.value = response
+    } catch (error) {
+      console.error('Failed to fetch current year active members:', error)
     }
   }
 
@@ -97,9 +107,11 @@ export const useMembersStore = defineStore('members', () => {
   return {
     members,
     activeMembers,
+    membersCurrentYear,
     membersBySection,
     fetchMembers,
     fetchActiveMembers,
+    fetchActiveCurrentYearMembers,
     fetchMembersBySection,
     addMember,
     updateMemberStatus,

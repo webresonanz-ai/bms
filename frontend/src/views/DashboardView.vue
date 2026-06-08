@@ -12,20 +12,20 @@
 
         <!-- Stats Cards -->
         <div class="row g-4 mb-4">
-            <div class="col-md-3 col-sm-6">
+            <div class="col-md-4 col-sm-12">
                 <div class="stat-card">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="stat-icon">
                             <i class="bi bi-people-fill text-white"></i>
                         </div>
-                        <span class="badge-earth">+12%</span>
+                        <span class="badge-earth">{{ previousYearGrowth }}%</span>
                     </div>
                     <h3 class="stat-value">{{ activeMembersCount }}</h3>
                     <p class="luxury-text-muted mb-0">Active Members</p>
                 </div>
             </div>
 
-            <div class="col-md-3 col-sm-6">
+            <div class="col-md-4 col-sm-12">
                 <div class="stat-card">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="stat-icon">
@@ -38,7 +38,7 @@
                 </div>
             </div>
 
-            <div class="col-md-3 col-sm-6">
+            <div class="col-md-4 col-sm-12">
                 <div class="stat-card">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="stat-icon">
@@ -48,19 +48,6 @@
                     </div>
                     <h3 class="stat-value">{{ totalPerformances }}</h3>
                     <p class="luxury-text-muted mb-0">Total Performances</p>
-                </div>
-            </div>
-
-            <div class="col-md-3 col-sm-6">
-                <div class="stat-card">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="stat-icon">
-                            <i class="bi bi-star-fill text-white"></i>
-                        </div>
-                        <span class="badge-gold">Rating</span>
-                    </div>
-                    <h3 class="stat-value">4.9</h3>
-                    <p class="luxury-text-muted mb-0">Overall Rating</p>
                 </div>
             </div>
         </div>
@@ -92,7 +79,8 @@
                         Recent Activities
                     </h5>
                     <div class="activity-list">
-                        <div v-for="(activity, index) in recentActivities" :key="index" class="activity-item luxury-activity-item">
+                        <div v-for="(activity, index) in recentActivities" :key="index"
+                            class="activity-item luxury-activity-item">
                             <div class="activity-dot"></div>
                             <div class="ms-3">
                                 <p class="mb-0 fw-semibold luxury-event-title">{{ activity.title }}</p>
@@ -130,7 +118,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="event in (upcomingEvents || []).slice(0, 3)" :key="event.id" class="luxury-table-row">
+                                <tr v-for="event in (upcomingEvents || []).slice(0, 3)" :key="event.id"
+                                    class="luxury-table-row">
                                     <td>{{ event.title }}</td>
                                     <td>{{ formatDate(event.date) }}</td>
                                     <td>{{ event.location }}</td>
@@ -169,7 +158,15 @@ const totalPerformances = computed(() =>
 onMounted(() => {
     eventsStore.fetchUpcomingEvents()
     membersStore.fetchActiveMembers()
+    membersStore.fetchActiveCurrentYearMembers()
 })
+
+const previousYearGrowth = computed(() => {
+    const totalActiveMembers = membersStore.activeMembers.length;
+    const totalCurrentYearMembers = membersStore.membersCurrentYear.length;
+    const growth = totalActiveMembers > 0 ? (totalCurrentYearMembers / totalActiveMembers) * 100 : 0;
+    return growth.toFixed(1);
+});
 
 const recentActivities = [
     { title: 'New member joined: David Wilson', time: '2 hours ago' },
@@ -244,74 +241,74 @@ const formatDate = (date) => {
 }
 
 .luxury-text-muted {
-  color: var(--text-secondary);
+    color: var(--text-secondary);
 }
 
 .luxury-event-title {
-  color: var(--text-primary);
+    color: var(--text-primary);
 }
 
 @media (max-width: 576px) {
-  .chart-placeholder {
-    height: 200px;
-    border-radius: 12px;
-  }
+    .chart-placeholder {
+        height: 200px;
+        border-radius: 12px;
+    }
 
-  .chart-placeholder .display-4 {
-    font-size: 2.5rem !important;
-  }
+    .chart-placeholder .display-4 {
+        font-size: 2.5rem !important;
+    }
 
-  .activity-item {
-    padding: 0.75rem 0;
-  }
+    .activity-item {
+        padding: 0.75rem 0;
+    }
 
-  .activity-dot {
-    width: 6px;
-    height: 6px;
-  }
+    .activity-dot {
+        width: 6px;
+        height: 6px;
+    }
 
-  .luxury-btn-sm {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.75rem;
-  }
+    .luxury-btn-sm {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.75rem;
+    }
 
-  .luxury-table thead th {
-    font-size: 0.7rem;
-    padding: 0.5rem;
-  }
+    .luxury-table thead th {
+        font-size: 0.7rem;
+        padding: 0.5rem;
+    }
 
-  .luxury-table tbody td {
-    padding: 0.5rem 0.25rem;
-    font-size: 0.85rem;
-  }
+    .luxury-table tbody td {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.85rem;
+    }
 
-  .luxury-table .bi {
-    font-size: 0.9rem;
-  }
+    .luxury-table .bi {
+        font-size: 0.9rem;
+    }
 }
 
 @media (max-width: 400px) {
-  .chart-placeholder {
-    height: 150px;
-  }
+    .chart-placeholder {
+        height: 150px;
+    }
 
-  .chart-placeholder .display-4 {
-    font-size: 2rem !important;
-  }
+    .chart-placeholder .display-4 {
+        font-size: 2rem !important;
+    }
 
-  .luxury-btn-sm {
-    padding: 0.3rem 0.5rem;
-    font-size: 0.7rem;
-  }
+    .luxury-btn-sm {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.7rem;
+    }
 
-  .luxury-table thead th {
-    font-size: 0.65rem;
-    padding: 0.4rem;
-  }
+    .luxury-table thead th {
+        font-size: 0.65rem;
+        padding: 0.4rem;
+    }
 
-  .luxury-table tbody td {
-    padding: 0.4rem 0.2rem;
-    font-size: 0.8rem;
-  }
+    .luxury-table tbody td {
+        padding: 0.4rem 0.2rem;
+        font-size: 0.8rem;
+    }
 }
 </style>

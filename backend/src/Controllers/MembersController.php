@@ -25,6 +25,12 @@ class MembersController
         $this->jsonResponse($this->formatMembers($members));
     }
 
+    public function activeCurrentYear(): void
+    {
+        $members = $this->memberModel->getActiveCurrentYear();
+        $this->jsonResponse($this->formatMembers($members));
+    }
+
     public function bySection(): void
     {
         $members = $this->memberModel->all();
@@ -101,7 +107,7 @@ class MembersController
             return;
         }
 
-        $header = array_map(fn($h) => strtolower(trim((string)$h)), $rows[0]);
+        $header = array_map(fn($h) => strtolower(trim((string) $h)), $rows[0]);
         $allowed = ['name', 'nickname', 'email', 'stage_name', 'birth_place', 'birth_date', 'domicile', 'phone', 'year_join', 'field_of_work', 'role', 'section', 'join_date', 'status', 'performances', 'avatar'];
         $header = array_intersect($header, $allowed);
 
@@ -133,7 +139,7 @@ class MembersController
             }
 
             $data['status'] = !empty($data['status']) ? $data['status'] : 'active';
-            $data['performances'] = !empty($data['performances']) ? (int)$data['performances'] : 0;
+            $data['performances'] = !empty($data['performances']) ? (int) $data['performances'] : 0;
             if (empty($data['join_date'])) {
                 $data['join_date'] = date('Y-m-d');
             }
@@ -207,7 +213,8 @@ class MembersController
     private function parseExcelDate(string $value): ?string
     {
         $value = trim($value);
-        if (empty($value)) return null;
+        if (empty($value))
+            return null;
         try {
             $dt = new \DateTime($value);
             return $dt->format('Y-m-d');

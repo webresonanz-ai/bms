@@ -502,6 +502,13 @@ function formatDate(date) {
 </script>
 
 <style scoped>
+.input-group-text {
+    background: rgba(166, 123, 91, 0.08);
+    border: 1px solid rgba(166, 123, 91, 0.3);
+    color: var(--text-secondary);
+    border-radius: 12px 0 0 12px;
+}
+
 .section-card {
     background: linear-gradient(135deg, rgba(166, 123, 91, 0.12), rgba(193, 154, 107, 0.08));
     border: 1px solid rgba(166, 123, 91, 0.25);

@@ -64,6 +64,8 @@ export const api = {
 
   getActiveMembers: () => apiFetch('/members/active'),
 
+  getActiveCurrentYearMembers: () => apiFetch('/members/active-current-year'),
+
   getMembersBySection: () => apiFetch('/members/section'),
 
   createMember: (data) => apiFetch('/members', {

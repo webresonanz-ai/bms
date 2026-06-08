@@ -6,11 +6,11 @@
                 <div class="col-lg-6">
                     <h1 class="display-4 fw-bold mb-3">Batavia Madrigal Singers</h1>
                     <p class="lead text-white-50 mb-4">
-                        Batavia Madrigal Singers adalah salah satu ensembel vokal, paduan suara terkemuka di Indonesia
-                        yang telah mengukir banyak prestasi bergengsi di dunia musik internasional maupun di Indonesia.
-
-                        Rentang zaman komposisi yang dibawakan BMS sangat beragam: komposisi musik dari zaman klasik
-                        hingga kontemporer, serta beraneka aliran dari barok hingga pop modern.
+                        Batavia Madrigal Singers is one of Indonesia's leading vocal ensembles and choirs, having
+                        achieved numerous prestigious accomplishments in both the international and Indonesian music
+                        scenes. The repertoire performed by BMS spans a wide range of musical eras, from classical to
+                        contemporary compositions, and encompasses various styles ranging from Baroque music to modern
+                        pop.
                     </p>
                     <div class="stats-row d-flex gap-4">
                         <div class="stat">
@@ -29,7 +29,8 @@
                 </div>
                 <div class="col-lg-6 text-center">
                     <div class="hero-image">
-                        <i class="bi bi-music-note-beamed display-1"></i>
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxULfnjzbu0nWV6P-zRBu1uzpcI4EE4iGPtg&s"
+                            alt="BMS Choir" class="img-hero-about">
                     </div>
                 </div>
             </div>
@@ -44,10 +45,8 @@
                     </div>
                     <h4 class="fw-bold mb-3">Our Mission</h4>
                     <p class="text-white-50">
-                        Untuk menginspirasi dan memperkaya komunitas kita melalui pertunjukan paduan suara yang luar
-                        biasa,
-                        mendorong keunggulan musikal dan menciptakan pengalaman yang mengubah, yang
-                        merayakan kekuatan suara manusia.
+                        To inspire and enrich our community through outstanding choral performances, fostering musical
+                        excellence and creating transformative experiences that celebrate the power of the human voice.
                     </p>
                 </div>
             </div>
@@ -58,8 +57,8 @@
                     </div>
                     <h4 class="fw-bold mb-3">Our Vision</h4>
                     <p class="text-white-50">
-                        Menjadi paduan suara terkemuka di Indonesia yang dikenal secara global, yang mempromosikan
-                        keunggulan musikal, inovasi artistik, dan dampak sosial positif melalui seni paduan suara.
+                        To become a leading choir in Indonesia with global recognition, promoting musical excellence,
+                        artistic innovation, and positive social impact through the art of choral music.
                     </p>
                 </div>
             </div>
@@ -182,13 +181,20 @@ const achievements = [
     width: 200px;
     height: 200px;
     margin: 0 auto;
-    background: var(--primary-gradient);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     box-shadow: 0 10px 40px rgba(166, 123, 91, 0.3);
+}
+
+.img-hero-about {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
 }
 
 .card-icon {

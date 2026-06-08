@@ -25,6 +25,7 @@ $router->add('PUT', '/auth/profile', [new AuthController(), 'updateProfile'], ['
 // Members routes
 $router->add('GET', '/members', [new MembersController(), 'index'], ['cors']);
 $router->add('GET', '/members/active', [new MembersController(), 'active'], ['cors']);
+$router->add('GET', '/members/active-current-year', [new MembersController(), 'activeCurrentYear'], ['cors']);
 $router->add('GET', '/members/section', [new MembersController(), 'bySection'], ['cors']);
 $router->add('POST', '/members', [new MembersController(), 'store'], ['cors']);
 $router->add('POST', '/members/import', [new MembersController(), 'import'], ['cors']);

@@ -55,6 +55,13 @@ class Member extends Model
         return $stmt->fetchAll();
     }
 
+    public function getActiveCurrentYear(): array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE status = 'active' AND join_date >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
     public function getBySection(): array
     {
         $stmt = $this->db->prepare("

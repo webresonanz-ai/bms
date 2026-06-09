@@ -4,7 +4,7 @@
             <div class="d-flex align-items-center justify-content-between w-100">
                 <div class="d-flex align-items-center">
                     <div class="logo-icon me-3">
-                        <img src="/bms_white.png" alt="BMS Logo" class="w-100 h-100">
+                        <img src="/bms_white.png" alt="BMS Logo" class="logo-img">
                     </div>
                     <div class="sidebar-text">
                         <h5 class="mb-0 fw-bold luxury-heading">BMS</h5>
@@ -193,12 +193,21 @@ const closeSidebar = () => {
 .logo-icon {
     width: 45px;
     height: 45px;
-    border-radius: 14px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     box-shadow: 0 4px 16px rgba(166, 123, 91, 0.3);
+    overflow: hidden;
+}
+
+.logo-img {
+    object-fit: cover;
+    object-position: center;
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
 }
 
 .sidebar-nav {

@@ -908,6 +908,11 @@ async function updateEvent() {
     border-color: var(--primary-color);
 }
 
+.form-select option {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
 .form-check-label {
     color: var(--text-secondary);
     cursor: pointer;

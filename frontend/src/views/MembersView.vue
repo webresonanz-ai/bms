@@ -53,9 +53,9 @@
             <div v-for="member in filteredMembers" :key="member.id" class="col-lg-4 col-md-6">
                 <div class="member-card luxury-card">
                     <div class="d-flex align-items-center mb-3">
-                        <img :src="member.avatar" :alt="member.name" class="member-avatar me-3">
+                        <img :src="member.avatar" :alt="formatName(member)" class="member-avatar me-3">
                         <div>
-                            <h5 class="mb-1 luxury-event-title">{{ member.name }}</h5>
+                            <h5 class="mb-1 luxury-event-title">{{ formatName(member) }}</h5>
                             <p class="mb-0 luxury-text-muted">{{ member.role }}</p>
                         </div>
                         <span class="badge ms-auto badge-section"
@@ -409,6 +409,13 @@ function displayPhone(phone) {
     const digits = String(phone).replace(/\D/g, '')
     const last4 = digits.slice(-4)
     return `***${last4}`
+}
+
+function formatName(member) {
+    if (member.nickname || member.stage_name) {
+        return `${member.nickname} (${member.stage_name})`
+    }
+    return member.name
 }
 
 async function addNewMember() {

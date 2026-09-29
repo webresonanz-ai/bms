@@ -1,8 +1,12 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 
+const router  = useRouter()
+const auth    = useAuthStore()
 const scrolled = ref(false)
-const isOpen = ref(false)
+const isOpen   = ref(false)
 
 let rafId = null
 
@@ -14,12 +18,16 @@ const handleScroll = () => {
   })
 }
 
+function handleLogout() {
+  auth.logout()
+  router.push({ name: 'home' })
+}
+
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
-  // Watch bootstrap's collapse state to animate the hamburger
   const menu = document.getElementById('navMenu')
   if (menu) {
-    menu.addEventListener('shown.bs.collapse', () => { isOpen.value = true })
+    menu.addEventListener('shown.bs.collapse',  () => { isOpen.value = true  })
     menu.addEventListener('hidden.bs.collapse', () => { isOpen.value = false })
   }
 })
@@ -75,6 +83,25 @@ onUnmounted(() => {
           <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
             <RouterLink class="btn btn-outline-gold btn-sm" to="/contact">Contact</RouterLink>
           </li>
+
+          <!-- Auth controls -->
+          <template v-if="auth.isLoggedIn">
+            <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+              <span class="nav-user text-gold">
+                <i class="bi bi-person-circle me-1"></i>{{ auth.user?.name?.split(' ')[0] }}
+              </span>
+            </li>
+            <li class="nav-item ms-lg-2 mt-1 mt-lg-0">
+              <button class="btn btn-sm nav-logout" @click="handleLogout">
+                <i class="bi bi-box-arrow-right me-1"></i>Logout
+              </button>
+            </li>
+          </template>
+          <template v-else>
+            <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+              <RouterLink class="btn btn-sm nav-login" to="/login">Sign In</RouterLink>
+            </li>
+          </template>
         </ul>
       </div>
     </div>
@@ -94,5 +121,50 @@ onUnmounted(() => {
 .btn-sm {
   padding: 0.5rem 1.25rem;
   font-size: 0.72rem;
+}
+
+.nav-user {
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.25rem;
+}
+
+.nav-login {
+  background: transparent;
+  color: var(--bms-gold);
+  border: 1px solid rgba(201, 169, 97, 0.55);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 500;
+  border-radius: 2px;
+  transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+  text-decoration: none;
+}
+
+.nav-login:hover {
+  background: var(--bms-gold);
+  color: var(--bms-darker);
+  transform: translateY(-2px);
+}
+
+.nav-logout {
+  background: transparent;
+  color: var(--bms-muted);
+  border: 1px solid rgba(168, 162, 147, 0.35);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 500;
+  border-radius: 2px;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.nav-logout:hover {
+  background: rgba(139, 30, 63, 0.2);
+  color: #e8a0b0;
+  border-color: rgba(139, 30, 63, 0.5);
 }
 </style>

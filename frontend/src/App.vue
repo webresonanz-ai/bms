@@ -1,7 +1,11 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import SiteNavbar from './components/SiteNavbar.vue'
 import SiteFooter from './components/SiteFooter.vue'
+
+const route = useRoute()
+const isAdminArea = computed(() => route.path.startsWith('/admin'))
 
 const scrollProgress = ref(0)
 const showBackToTop = ref(false)
@@ -66,7 +70,7 @@ onUnmounted(() => {
       aria-hidden="true"
     ></div>
 
-    <SiteNavbar />
+    <SiteNavbar v-if="!isAdminArea" />
 
     <main id="main-content">
       <RouterView v-slot="{ Component }">
@@ -76,7 +80,7 @@ onUnmounted(() => {
       </RouterView>
     </main>
 
-    <SiteFooter />
+    <SiteFooter v-if="!isAdminArea" />
 
     <transition name="fade">
       <button

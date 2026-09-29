@@ -24,7 +24,7 @@ export const useAuthStore = defineStore('auth', () => {
     const headers = {
       'Content-Type': 'application/json',
       ...(token.value ? { Authorization: `Bearer ${token.value}` } : {}),
-      ...(options.headers || {}),
+      ...options.headers,
     }
 
     const res = await fetch(`${API_BASE}${endpoint}`, {
@@ -80,5 +80,5 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { token, user, isLoggedIn, isAdmin, register, login, logout, fetchMe }
+  return { token, user, isLoggedIn, isAdmin, apiFetch, register, login, logout, fetchMe }
 })

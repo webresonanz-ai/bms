@@ -1,21 +1,29 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL
+
 export const useChoirStore = defineStore('choir', () => {
-  const members = ref([
-    { id: 1, name: 'Aria Wijaya', role: 'Soprano', section: 'Soprano', joined: 2015, initials: 'AW' },
-    { id: 2, name: 'Bunga Lestari', role: 'Soprano', section: 'Soprano', joined: 2016, initials: 'BL' },
-    { id: 3, name: 'Citra Dewi', role: 'Soprano', section: 'Soprano', joined: 2018, initials: 'CD' },
-    { id: 4, name: 'Damar Pratama', role: 'Alto', section: 'Alto', joined: 2014, initials: 'DP' },
-    { id: 5, name: 'Eka Sari', role: 'Alto', section: 'Alto', joined: 2017, initials: 'ES' },
-    { id: 6, name: 'Fajar Nugroho', role: 'Tenor', section: 'Tenor', joined: 2013, initials: 'FN' },
-    { id: 7, name: 'Gita Permata', role: 'Tenor', section: 'Tenor', joined: 2019, initials: 'GP' },
-    { id: 8, name: 'Hadi Santoso', role: 'Bass', section: 'Bass', joined: 2012, initials: 'HS' },
-    { id: 9, name: 'Indah Cahaya', role: 'Bass', section: 'Bass', joined: 2020, initials: 'IC' },
-    { id: 10, name: 'Joko Widodo', role: 'Baritone', section: 'Bass', joined: 2011, initials: 'JW' },
-    { id: 11, name: 'Kartika Sari', role: 'Soprano', section: 'Soprano', joined: 2021, initials: 'KS' },
-    { id: 12, name: 'Larasati Putri', role: 'Alto', section: 'Alto', joined: 2019, initials: 'LP' }
-  ])
+  // ── Members (live from database, public endpoint) ─────────────────
+  const members = ref([])
+  const membersLoading = ref(false)
+  const membersError = ref('')
+
+  async function fetchMembers() {
+    membersLoading.value = true
+    membersError.value = ''
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/members`)
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Failed to load members.')
+      members.value = data.data?.members ?? []
+    } catch (err) {
+      membersError.value = err.message || 'Failed to load members.'
+      members.value = []
+    } finally {
+      membersLoading.value = false
+    }
+  }
 
   const events = ref([
     {
@@ -69,5 +77,5 @@ export const useChoirStore = defineStore('choir', () => {
     { year: '2024', title: 'World Choir Games', description: 'Awarded Gold Medal at the World Choir Games in Auckland.' }
   ])
 
-  return { members, events, milestones }
+  return { members, membersLoading, membersError, fetchMembers, events, milestones }
 })

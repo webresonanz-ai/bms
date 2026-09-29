@@ -35,6 +35,34 @@ const router = createRouter({
       name: 'contact',
       component: () => import('../views/ContactView.vue')
     },
+    // ── Admin (nested under AdminLayout, admin-only) ───────────────
+    {
+      path: '/admin',
+      component: () => import('../views/admin/AdminLayout.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+      children: [
+        {
+          path: '',
+          name: 'admin-overview',
+          component: () => import('../views/admin/AdminOverview.vue'),
+        },
+        {
+          path: 'members',
+          name: 'admin-members',
+          component: () => import('../views/admin/AdminMembers.vue'),
+        },
+        {
+          path: 'events',
+          name: 'admin-events',
+          component: () => import('../views/admin/AdminEvents.vue'),
+        },
+        {
+          path: 'gallery',
+          name: 'admin-gallery',
+          component: () => import('../views/admin/AdminGallery.vue'),
+        },
+      ],
+    },
     // ── Auth routes ────────────────────────────────────────────────
     {
       path: '/login',
@@ -66,6 +94,11 @@ router.beforeEach((to) => {
   // Logged-in users are bounced away from login/register
   if (to.meta.guestOnly && auth.isLoggedIn) {
     return { name: 'home' }
+  }
+
+  // Only admins may access admin pages
+  if (to.matched.some(record => record.meta.requiresAdmin) && !auth.isAdmin) {
+    return auth.isLoggedIn ? { name: 'home' } : { name: 'login', query: { redirect: to.fullPath } }
   }
 })
 

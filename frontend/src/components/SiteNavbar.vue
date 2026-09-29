@@ -86,6 +86,11 @@ onUnmounted(() => {
 
           <!-- Auth controls -->
           <template v-if="auth.isLoggedIn">
+            <li v-if="auth.isAdmin" class="nav-item ms-lg-3 mt-2 mt-lg-0">
+              <RouterLink class="btn btn-gold btn-sm" to="/admin">
+                <i class="bi bi-speedometer2 me-1"></i>Dashboard
+              </RouterLink>
+            </li>
             <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
               <span class="nav-user text-gold">
                 <i class="bi bi-person-circle me-1"></i>{{ auth.user?.name?.split(' ')[0] }}

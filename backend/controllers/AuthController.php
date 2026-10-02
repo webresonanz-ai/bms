@@ -9,6 +9,7 @@ require_once __DIR__ . '/../models/UserModel.php';
 require_once __DIR__ . '/../helpers/response.php';
 require_once __DIR__ . '/../helpers/validate.php';
 require_once __DIR__ . '/../helpers/jwt.php';
+require_once __DIR__ . '/../helpers/google.php';
 require_once __DIR__ . '/../config/app.php';
 
 class AuthController
@@ -70,6 +71,73 @@ class AuthController
         // Use a generic message to avoid user enumeration
         if (!$user || !$this->userModel->verifyPassword($input['password'], $user['password_hash'])) {
             respondError('Invalid email or password.', 401);
+        }
+
+        $token = $this->buildToken($user);
+
+        respondSuccess([
+            'token' => $token,
+            'user'  => $this->safeUser($user),
+        ]);
+    }
+
+    // ------------------------------------------------------------------
+    // POST /api/v1/auth/google   { "id_token" | "credential": "<GIS credential>" }
+    // ------------------------------------------------------------------
+    public function google(): never
+    {
+        if (GOOGLE_CLIENT_ID === '') {
+            respondError('Google login is not configured on the server (missing GOOGLE_CLIENT_ID).', 500);
+        }
+
+        $input = $this->getJsonInput();
+        $idToken = $input['id_token'] ?? $input['credential'] ?? '';
+
+        if (!is_string($idToken) || trim($idToken) === '') {
+            respondError('Validation failed.', 422, [
+                'id_token' => 'A Google ID token is required.',
+            ]);
+        }
+
+        $claims = verifyGoogleIdToken($idToken);
+        if ($claims === null) {
+            respondError('Invalid or expired Google credential.', 401);
+        }
+
+        $googleId = (string) ($claims['sub'] ?? '');
+        $email    = strtolower(trim((string) ($claims['email'] ?? '')));
+        $name     = trim((string) ($claims['name'] ?? ''));
+        $avatar   = isset($claims['picture']) ? (string) $claims['picture'] : null;
+
+        if ($googleId === '' || $email === '') {
+            respondError('Invalid Google credential payload.', 401);
+        }
+
+        // 1) Existing link by google_id → log in
+        $user = $this->userModel->findByGoogleId($googleId);
+
+        // 2) Otherwise match by email → link accounts, then log in
+        if (!$user) {
+            $user = $this->userModel->findByEmail($email);
+            if ($user) {
+                $this->userModel->linkGoogleId((int) $user['id'], $googleId, $avatar);
+                $user = $this->userModel->findById((int) $user['id']);
+            }
+        }
+
+        // 3) Brand-new Google user → create (role = member)
+        if (!$user) {
+            $userId = $this->userModel->createGoogleUser(
+                $name !== '' ? $name : $email,
+                $email,
+                $googleId,
+                $avatar
+            );
+            $user = $this->userModel->findById($userId);
+        }
+
+        if (!$user) {
+            respondError('Could not sign you in with Google. Please try again.', 500);
         }
 
         $token = $this->buildToken($user);

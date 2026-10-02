@@ -25,6 +25,7 @@ $static = [
     // Auth
     'POST /api/v1/auth/register' => [AuthController::class,  'register'],
     'POST /api/v1/auth/login'    => [AuthController::class,  'login'],
+    'POST /api/v1/auth/google'   => [AuthController::class,  'google'],
     'GET /api/v1/auth/me'        => [AuthController::class,  'me'],
 
     // Collections

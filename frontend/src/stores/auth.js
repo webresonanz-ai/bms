@@ -63,6 +63,15 @@ export const useAuthStore = defineStore('auth', () => {
     return data.data.user
   }
 
+  async function loginWithGoogle(idToken) {
+    const data = await apiFetch('/api/v1/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ id_token: idToken }),
+    })
+    persist(data.data.token, data.data.user)
+    return data.data.user
+  }
+
   function logout() {
     token.value = null
     user.value  = null
@@ -80,5 +89,5 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { token, user, isLoggedIn, isAdmin, apiFetch, register, login, logout, fetchMe }
+  return { token, user, isLoggedIn, isAdmin, apiFetch, register, login, loginWithGoogle, logout, fetchMe }
 })

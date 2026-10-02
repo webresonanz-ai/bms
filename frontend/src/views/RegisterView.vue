@@ -1,12 +1,14 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { renderGoogleButton, isGoogleConfigured } from '../utils/googleAuth'
 
 const router = useRouter()
 const auth   = useAuthStore()
 
 const loading  = ref(false)
+const googleLoading = ref(false)
 const apiError = ref('')
 const fieldErrors = reactive({})
 
@@ -19,6 +21,29 @@ const form = reactive({
 
 const showPassword  = ref(false)
 const showConfirm   = ref(false)
+const googleBtnEl = ref(null)
+
+onMounted(async () => {
+  if (!isGoogleConfigured()) return
+  try {
+    await renderGoogleButton(googleBtnEl.value, handleGoogleCredential, { text: 'signup_with' })
+  } catch (e) {
+    console.warn('[Google sign-up]', e.message)
+  }
+})
+
+async function handleGoogleCredential(idToken) {
+  apiError.value = ''
+  googleLoading.value = true
+  try {
+    await auth.loginWithGoogle(idToken)
+    router.push({ name: 'home' })
+  } catch (err) {
+    apiError.value = err.message || 'Google sign-up failed. Please try again.'
+  } finally {
+    googleLoading.value = false
+  }
+}
 
 // Live password strength indicator
 const strength = computed(() => {
@@ -228,6 +253,15 @@ async function handleSubmit() {
           </button>
         </form>
 
+        <!-- Divider -->
+        <div class="auth-divider" aria-hidden="true"><span>or</span></div>
+
+        <!-- Google Sign-Up (official GIS button renders here) -->
+        <div class="google-wrap">
+          <div ref="googleBtnEl" class="google-btn" :class="{ 'is-loading': googleLoading }"></div>
+          <p v-if="googleLoading" class="google-status">Signing up with Google…</p>
+        </div>
+
         <p class="text-center mt-4 mb-0" style="font-size: 0.85rem; color: var(--bms-muted);">
           Already have an account?
           <RouterLink to="/login" class="text-gold text-decoration-none ms-1">Sign in</RouterLink>
@@ -377,4 +411,43 @@ async function handleSubmit() {
 .strength-text.strength-fair   { color: #e0a85c; }
 .strength-text.strength-good   { color: #a8c85c; }
 .strength-text.strength-strong { color: #5cc87a; }
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+  color: var(--bms-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(201, 169, 97, 0.25);
+}
+
+.google-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.google-btn {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+.google-btn.is-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.google-status {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--bms-muted);
+  margin: 0.5rem 0 0;
+}
 </style>

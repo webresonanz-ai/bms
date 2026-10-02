@@ -10,3 +10,7 @@ define('ALLOWED_ORIGIN',      env('ALLOWED_ORIGIN',      'http://localhost:5173'
 define('JWT_SECRET',           env('JWT_SECRET',           'fallback-secret-change-me'));
 define('JWT_EXPIRY_SECONDS',  (int) env('JWT_EXPIRY_SECONDS', 3600));
 define('BCRYPT_COST',         (int) env('BCRYPT_COST',        12));
+
+// Google OAuth — Client ID of type "Web application" from Google Cloud Console.
+// Used to verify Google ID tokens on POST /api/v1/auth/google.
+define('GOOGLE_CLIENT_ID',     env('GOOGLE_CLIENT_ID',     ''));

@@ -35,6 +35,7 @@ $static = [
     'POST /api/v1/events'        => [EventController::class,  'store'],
     'GET /api/v1/gallery'        => [GalleryController::class,'index'],
     'POST /api/v1/gallery'       => [GalleryController::class,'store'],
+    'POST /api/v1/gallery/upload' => [GalleryController::class,'upload'],
 ];
 
 $key = "$method $uri";

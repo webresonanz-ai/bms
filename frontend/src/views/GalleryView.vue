@@ -1,17 +1,22 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useChoirStore } from '../stores/choir'
+import { resolveUploadSrc } from '../utils/imageCompress'
 
-const galleryItems = [
-  { icon: 'bi-music-note-beamed', title: 'Concert Hall', category: 'Performance' },
-  { icon: 'bi-people', title: 'Ensemble', category: 'Group' },
-  { icon: 'bi-mic', title: 'Solo Moments', category: 'Performance' },
-  { icon: 'bi-globe', title: 'World Tour', category: 'Tour' },
-  { icon: 'bi-heart', title: 'Backstage', category: 'Behind the Scenes' },
-  { icon: 'bi-star', title: 'Award Night', category: 'Milestone' },
-  { icon: 'bi-camera', title: 'Rehearsal', category: 'Behind the Scenes' },
-  { icon: 'bi-chat-quote', title: 'Interview', category: 'Media' },
-  { icon: 'bi-music-note-list', title: 'Recording', category: 'Studio' }
-]
+const choirStore = useChoirStore()
+
+// Live gallery items from the database (sorted by sort_order via API)
+const galleryItems = computed(() => choirStore.galleryItems ?? [])
+
+const photoSrc = (item) => resolveUploadSrc(item?.image_url)
+
+function formatPhotoDate(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(`${dateStr}T00:00:00`)
+  return Number.isNaN(d.getTime())
+    ? dateStr
+    : d.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
+}
 
 const activeItem = ref(null)
 const activeIndex = ref(-1)
@@ -29,15 +34,15 @@ const closeLightbox = () => {
 }
 
 const showPrev = () => {
-  const next = (activeIndex.value - 1 + galleryItems.length) % galleryItems.length
+  const next = (activeIndex.value - 1 + galleryItems.value.length) % galleryItems.value.length
   activeIndex.value = next
-  activeItem.value = galleryItems[next]
+  activeItem.value = galleryItems.value[next]
 }
 
 const showNext = () => {
-  const next = (activeIndex.value + 1) % galleryItems.length
+  const next = (activeIndex.value + 1) % galleryItems.value.length
   activeIndex.value = next
-  activeItem.value = galleryItems[next]
+  activeItem.value = galleryItems.value[next]
 }
 
 const handleKey = (e) => {
@@ -47,7 +52,10 @@ const handleKey = (e) => {
   else if (e.key === 'ArrowRight') showNext()
 }
 
-onMounted(() => window.addEventListener('keydown', handleKey))
+onMounted(async () => {
+  window.addEventListener('keydown', handleKey)
+  await choirStore.fetchGallery()
+})
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKey)
   document.body.style.overflow = ''
@@ -69,10 +77,39 @@ onUnmounted(() => {
 
     <section class="section-padding bg-dark-custom">
       <div class="container">
-        <div class="row g-4">
+        <!-- Loading state (live fetch from database) -->
+        <div v-if="choirStore.galleryLoading" class="row g-4">
+          <div v-for="n in 6" :key="n" class="col-lg-4 col-md-6">
+            <div class="gallery-item" aria-hidden="true">
+              <div class="gallery-item-inner">
+                <i class="bi bi-hourglass-split"></i>
+              </div>
+              <div class="gallery-caption">
+                <p class="text-gold small mb-0">Loading…</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error state -->
+        <div v-else-if="choirStore.galleryError" class="text-center py-5">
+          <i class="bi bi-exclamation-circle text-gold" style="font-size: 3rem; opacity: 0.5;"></i>
+          <p class="text-muted mt-3">{{ choirStore.galleryError }}</p>
+          <button class="btn btn-outline-gold mt-2" @click="choirStore.fetchGallery()">
+            Try again
+          </button>
+        </div>
+
+        <!-- Empty state -->
+        <div v-else-if="!galleryItems.length" class="text-center py-5">
+          <i class="bi bi-images text-gold" style="font-size: 3rem; opacity: 0.5;"></i>
+          <p class="text-muted mt-3">No gallery items to display yet.</p>
+        </div>
+
+        <div v-else class="row g-4">
           <div
             v-for="(item, index) in galleryItems"
-            :key="item.title"
+            :key="item.id ?? item.title"
             class="col-lg-4 col-md-6"
             v-reveal="{ delay: (index % 3) * 100 }"
           >
@@ -85,13 +122,20 @@ onUnmounted(() => {
               @keydown.enter="openLightbox(item, index)"
             >
               <div class="gallery-item-inner">
-                <i :class="`bi ${item.icon}`"></i>
+                <img
+                  v-if="photoSrc(item)"
+                  :src="photoSrc(item)"
+                  :alt="item.title"
+                  loading="lazy"
+                />
+                <i v-else :class="`bi ${item.icon || 'bi-image'}`"></i>
               </div>
               <div class="gallery-caption">
                 <p class="text-gold small mb-0" style="letter-spacing: 0.15em; text-transform: uppercase; font-size: 0.7rem;">
                   {{ item.category }}
                 </p>
                 <h6 class="text-cream mb-0">{{ item.title }}</h6>
+                <p v-if="item.photo_date" class="gallery-date mb-0">{{ formatPhotoDate(item.photo_date) }}</p>
               </div>
             </div>
           </div>
@@ -118,14 +162,22 @@ onUnmounted(() => {
           </button>
 
           <div class="lightbox-panel">
-            <div class="lightbox-frame">
-              <i :class="`bi ${activeItem.icon}`"></i>
+            <div class="lightbox-frame" :class="{ 'has-photo': photoSrc(activeItem) }">
+              <img
+                v-if="photoSrc(activeItem)"
+                :src="photoSrc(activeItem)"
+                :alt="activeItem.title"
+              />
+              <i v-else :class="`bi ${activeItem.icon || 'bi-image'}`"></i>
             </div>
             <div class="mt-4">
               <p class="text-gold small mb-1" style="letter-spacing: 0.2em; text-transform: uppercase;">
                 {{ activeItem.category }}
               </p>
               <h4 class="text-cream mb-0">{{ activeItem.title }}</h4>
+              <p v-if="activeItem.photo_date" class="small mb-0" style="color: var(--bms-gold);">
+                {{ formatPhotoDate(activeItem.photo_date) }}
+              </p>
               <p class="small text-muted mt-2 mb-0">{{ activeIndex + 1 }} / {{ galleryItems.length }}</p>
             </div>
           </div>
@@ -138,3 +190,32 @@ onUnmounted(() => {
     </Teleport>
   </div>
 </template>
+
+<style scoped>
+.gallery-item-inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-date {
+  font-size: 0.7rem;
+  color: var(--bms-muted);
+  margin-top: 0.2rem;
+}
+
+.lightbox-frame.has-photo {
+  aspect-ratio: auto;
+  padding: 0;
+  background: #000;
+  overflow: hidden;
+}
+
+.lightbox-frame.has-photo img {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  display: block;
+}
+</style>

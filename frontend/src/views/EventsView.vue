@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useChoirStore } from '../stores/choir'
 
 const choirStore = useChoirStore()
@@ -48,10 +48,17 @@ const formatDate = (dateStr) => {
   })
 }
 
-onMounted(() => {
+// DB stores TIME as HH:MM:SS — display as HH:MM
+const formatTime = (timeStr) => String(timeStr ?? '').slice(0, 5)
+
+onMounted(async () => {
+  await choirStore.fetchEvents()
   updateCountdown()
   timer = setInterval(updateCountdown, 1000)
 })
+
+// Restart the countdown once live data arrives
+watch(nextEvent, () => updateCountdown())
 
 onUnmounted(() => {
   if (timer) clearInterval(timer)
@@ -78,7 +85,7 @@ onUnmounted(() => {
                 Next Performance
               </p>
               <h3 class="text-cream mb-1">{{ nextEvent.title }}</h3>
-              <p class="small text-muted mb-0">{{ formatDate(nextEvent.date) }} · {{ nextEvent.time }} WIB</p>
+              <p class="small text-muted mb-0">{{ formatDate(nextEvent.date) }} · {{ formatTime(nextEvent.time) }} WIB</p>
             </div>
             <div class="col-lg-7">
               <div class="d-flex justify-content-center justify-content-lg-end gap-2 gap-md-3 flex-wrap">
@@ -116,7 +123,25 @@ onUnmounted(() => {
           </button>
         </div>
 
-        <div class="row justify-content-center">
+        <!-- Loading state (live fetch from database) -->
+        <div v-if="choirStore.eventsLoading" class="row justify-content-center">
+          <div class="col-lg-9">
+            <div v-for="n in 3" :key="n" class="elegant-card p-4 p-md-5 mb-4" aria-hidden="true">
+              <p class="text-muted small mb-0">Loading events…</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error state -->
+        <div v-else-if="choirStore.eventsError" class="text-center py-5">
+          <i class="bi bi-exclamation-circle text-gold" style="font-size: 3rem; opacity: 0.5;"></i>
+          <p class="text-muted mt-3">{{ choirStore.eventsError }}</p>
+          <button class="btn btn-outline-gold mt-2" @click="choirStore.fetchEvents()">
+            Try again
+          </button>
+        </div>
+
+        <div v-else class="row justify-content-center">
           <div class="col-lg-9">
             <div
               v-for="(event, index) in filteredEvents"
@@ -146,7 +171,7 @@ onUnmounted(() => {
                   <p class="small mb-3">{{ event.description }}</p>
                   <div class="d-flex flex-wrap gap-3 small text-muted">
                     <span><i class="bi bi-geo-alt text-gold me-2"></i>{{ event.venue }}, {{ event.city }}</span>
-                    <span><i class="bi bi-clock text-gold me-2"></i>{{ event.time }} WIB</span>
+                    <span><i class="bi bi-clock text-gold me-2"></i>{{ formatTime(event.time) }} WIB</span>
                   </div>
                 </div>
               </div>

@@ -81,6 +81,8 @@ CREATE TABLE IF NOT EXISTS gallery_items (
     title       VARCHAR(200)    NOT NULL,
     category    VARCHAR(100)    NOT NULL,
     icon        VARCHAR(60)     NOT NULL DEFAULT 'bi-image',
+    image_url   VARCHAR(512)    NULL,
+    photo_date  DATE            NULL,
     sort_order  INT             NOT NULL DEFAULT 0,
     created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP

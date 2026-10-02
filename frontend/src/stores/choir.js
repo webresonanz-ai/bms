@@ -25,48 +25,51 @@ export const useChoirStore = defineStore('choir', () => {
     }
   }
 
-  const events = ref([
-    {
-      id: 1,
-      title: 'Harmony of the Archipelago',
-      date: '2026-11-21',
-      time: '19:30',
-      venue: 'Aula Simfonia Jakarta',
-      city: 'Jakarta',
-      description: 'A journey through Indonesian folk songs reimagined for chamber choir.',
-      status: 'upcoming'
-    },
-    {
-      id: 2,
-      title: 'Sacred Voices: Requiem',
-      date: '2026-12-13',
-      time: '18:00',
-      venue: 'Katedral Jakarta',
-      city: 'Jakarta',
-      description: 'Featuring Fauré\'s Requiem and works by contemporary composers.',
-      status: 'upcoming'
-    },
-    {
-      id: 3,
-      title: 'Christmas with Batavia',
-      date: '2024-12-20',
-      time: '20:00',
-      venue: 'Balai Kartini',
-      city: 'Jakarta',
-      description: 'An evening of carols and holiday favorites for the whole family.',
-      status: 'past'
-    },
-    {
-      id: 4,
-      title: 'Bach Motets Marathon',
-      date: '2024-10-05',
-      time: '16:00',
-      venue: 'Goethe Institut',
-      city: 'Jakarta',
-      description: 'Complete performance of J.S. Bach\'s six motets.',
-      status: 'past'
+  // ── Events (live from database, public endpoint) ──────────────────
+  const events = ref([])
+  const eventsLoading = ref(false)
+  const eventsError = ref('')
+
+  async function fetchEvents() {
+    // Avoid refetching when data is already loaded
+    if (events.value.length || eventsLoading.value) return
+    eventsLoading.value = true
+    eventsError.value = ''
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/events`)
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Failed to load events.')
+      events.value = data.data?.events ?? []
+    } catch (err) {
+      eventsError.value = err.message || 'Failed to load events.'
+      events.value = []
+    } finally {
+      eventsLoading.value = false
     }
-  ])
+  }
+
+  // ── Gallery (live from database, public endpoint) ─────────────────
+  const galleryItems = ref([])
+  const galleryLoading = ref(false)
+  const galleryError = ref('')
+
+  async function fetchGallery() {
+    // Avoid refetching when data is already loaded
+    if (galleryItems.value.length || galleryLoading.value) return
+    galleryLoading.value = true
+    galleryError.value = ''
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/gallery`)
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Failed to load gallery.')
+      galleryItems.value = data.data?.items ?? []
+    } catch (err) {
+      galleryError.value = err.message || 'Failed to load gallery.'
+      galleryItems.value = []
+    } finally {
+      galleryLoading.value = false
+    }
+  }
 
   const milestones = ref([
     { year: '2001', title: 'Foundation', description: 'Batavia Madrigal Singers was founded by a group of passionate choral enthusiasts in Jakarta.' },
@@ -77,5 +80,10 @@ export const useChoirStore = defineStore('choir', () => {
     { year: '2024', title: 'World Choir Games', description: 'Awarded Gold Medal at the World Choir Games in Auckland.' }
   ])
 
-  return { members, membersLoading, membersError, fetchMembers, events, milestones }
+  return {
+    members, membersLoading, membersError, fetchMembers,
+    events, eventsLoading, eventsError, fetchEvents,
+    galleryItems, galleryLoading, galleryError, fetchGallery,
+    milestones,
+  }
 })

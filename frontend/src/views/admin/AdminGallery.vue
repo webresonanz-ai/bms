@@ -2,9 +2,10 @@
 /**
  * AdminGallery — manage gallery items (grid, filter, create, edit, delete).
  */
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useAdminStore } from '../../stores/admin'
 import { useAuthStore } from '../../stores/auth'
+import { compressImage, formatBytes, resolveUploadSrc } from '../../utils/imageCompress'
 import AdminModal from '../../components/admin/AdminModal.vue'
 import ConfirmDialog from '../../components/admin/ConfirmDialog.vue'
 
@@ -24,11 +25,71 @@ const iconOptions = [
   'bi-heart', 'bi-star', 'bi-camera', 'bi-chat-quote', 'bi-music-note-list',
 ]
 
-const emptyForm = () => ({ title: '', category: '', icon: 'bi-image', sort_order: 0 })
+const emptyForm = () => ({ title: '', category: '', icon: 'bi-image', sort_order: 0, photo_date: '', image_url: '' })
 
 const form        = reactive(emptyForm())
 const fieldErrors = reactive({})
 const apiError    = ref('')
+
+// ── Photo upload state (client-side compression before upload) ──
+const fileInput    = ref(null)
+const pendingPhoto = ref(null) // { blob, name, previewUrl, originalSize, size, skipped }
+const uploading    = ref(false)
+
+const photoPreview = computed(() => {
+  if (pendingPhoto.value) return pendingPhoto.value.previewUrl
+  return resolveUploadSrc(form.image_url)
+})
+
+const compressionInfo = computed(() => {
+  const p = pendingPhoto.value
+  if (!p) return ''
+  if (p.skipped || p.size >= p.originalSize) return `${formatBytes(p.size)} · already optimised`
+  const saved = Math.round((1 - p.size / p.originalSize) * 100)
+  return `${formatBytes(p.originalSize)} → ${formatBytes(p.size)} (${saved}% smaller)`
+})
+
+function revokePendingPreview() {
+  if (pendingPhoto.value?.previewUrl) URL.revokeObjectURL(pendingPhoto.value.previewUrl)
+  pendingPhoto.value = null
+}
+
+async function onFileChange(e) {
+  const file = e.target.files?.[0]
+  // Reset the input so the same file can be picked again
+  e.target.value = ''
+  if (!file) return
+  delete fieldErrors.image
+  try {
+    const result = await compressImage(file)
+    revokePendingPreview()
+    pendingPhoto.value = {
+      ...result,
+      name: file.name.replace(/\.[^.]+$/, '') || 'photo',
+      previewUrl: URL.createObjectURL(result.blob),
+    }
+  } catch (err) {
+    fieldErrors.image = err.message || 'Could not process image.'
+  }
+}
+
+function removePhoto() {
+  revokePendingPreview()
+  form.image_url = ''
+  delete fieldErrors.image
+}
+
+function thumbSrc(item) {
+  return resolveUploadSrc(item.image_url)
+}
+
+function formatPhotoDate(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(`${dateStr}T00:00:00`)
+  return Number.isNaN(d.getTime())
+    ? dateStr
+    : d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+}
 
 const filteredItems = computed(() => {
   const q = search.value.trim().toLowerCase()
@@ -42,6 +103,7 @@ function openCreate() {
   editingId.value = null
   const nextSort = Math.max(0, ...admin.galleryItems.map(g => Number(g.sort_order) || 0)) + 1
   Object.assign(form, { ...emptyForm(), sort_order: nextSort })
+  revokePendingPreview()
   clearErrors()
   showForm.value = true
 }
@@ -51,7 +113,9 @@ function openEdit(item) {
   Object.assign(form, {
     title: item.title, category: item.category,
     icon: item.icon || 'bi-image', sort_order: Number(item.sort_order) || 0,
+    photo_date: item.photo_date || '', image_url: item.image_url || '',
   })
+  revokePendingPreview()
   clearErrors()
   showForm.value = true
 }
@@ -65,8 +129,25 @@ async function handleSubmit() {
   clearErrors()
   saving.value = true
   try {
-    if (editingId.value === null) await admin.createGalleryItem({ ...form })
-    else await admin.updateGalleryItem(editingId.value, { ...form })
+    // 1) Upload the (already client-compressed) photo first, if one was picked
+    if (pendingPhoto.value) {
+      uploading.value = true
+      try {
+        const uploaded = await admin.uploadGalleryImage(
+          pendingPhoto.value.blob,
+          `${pendingPhoto.value.name}.webp`,
+        )
+        form.image_url = uploaded.path
+      } finally {
+        uploading.value = false
+      }
+    }
+
+    // 2) Save the gallery item
+    const payload = { ...form, photo_date: form.photo_date || null, image_url: form.image_url || null }
+    if (editingId.value === null) await admin.createGalleryItem(payload)
+    else await admin.updateGalleryItem(editingId.value, payload)
+    revokePendingPreview()
     showForm.value = false
   } catch (err) {
     if (err.errors && Object.keys(err.errors).length) Object.assign(fieldErrors, err.errors)
@@ -99,6 +180,8 @@ onMounted(async () => {
   if (!auth.isAdmin) return
   try { await admin.fetchGallery() } catch { /* handled by admin.error */ }
 })
+
+onUnmounted(() => revokePendingPreview())
 </script>
 
 <template>
@@ -177,7 +260,13 @@ onMounted(async () => {
         <div class="gallery-admin-card" v-reveal>
           <!-- Thumbnail with hover overlay -->
           <div class="gallery-admin-thumb">
-            <i class="bi" :class="item.icon"></i>
+            <img
+              v-if="thumbSrc(item)"
+              :src="thumbSrc(item)"
+              :alt="item.title"
+              loading="lazy"
+            />
+            <i v-else class="bi" :class="item.icon"></i>
             <span class="sort-pill">#{{ item.sort_order }}</span>
 
             <!-- Hover action overlay -->
@@ -203,6 +292,9 @@ onMounted(async () => {
           <div class="gallery-card-body">
             <p class="gallery-card-category">{{ item.category }}</p>
             <h6 class="gallery-card-title">{{ item.title }}</h6>
+            <p v-if="item.photo_date" class="gallery-card-date">
+              <i class="bi bi-calendar3 me-1"></i>{{ formatPhotoDate(item.photo_date) }}
+            </p>
 
             <!-- Visible action buttons for keyboard / small screens -->
             <div class="gallery-card-actions">
@@ -239,6 +331,48 @@ onMounted(async () => {
         </div>
 
         <div class="row g-3">
+          <!-- Photo upload -->
+          <div class="col-12">
+            <span class="form-label-lux d-block mb-2">Photo <small class="text-muted">(auto-compressed)</small></span>
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              class="d-none"
+              aria-label="Choose a photo"
+              @change="onFileChange"
+            />
+            <div
+              class="photo-drop"
+              :class="{ 'has-photo': photoPreview }"
+              role="button"
+              tabindex="0"
+              aria-label="Choose a photo to upload"
+              @click="fileInput?.click()"
+              @keydown.enter="fileInput?.click()"
+            >
+              <img v-if="photoPreview" :src="photoPreview" alt="Gallery photo preview" />
+              <div v-else class="photo-drop-empty">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <p class="mb-0">Click to choose a photo</p>
+                <small>JPG · PNG · GIF · WebP — max 15 MB</small>
+              </div>
+              <span v-if="uploading" class="photo-uploading">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Uploading…
+              </span>
+            </div>
+            <div v-if="photoPreview" class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+              <small v-if="compressionInfo" class="compression-info">
+                <i class="bi bi-file-earmark-zip me-1"></i>{{ compressionInfo }}
+              </small>
+              <button type="button" class="btn-remove-photo" @click="removePhoto">
+                <i class="bi bi-trash3 me-1"></i>Remove photo
+              </button>
+            </div>
+            <p v-if="fieldErrors.image" class="field-error mt-1">{{ fieldErrors.image }}</p>
+          </div>
+
           <div class="col-md-8">
             <label for="gallery-title" class="form-label-lux">Title</label>
             <input
@@ -255,7 +389,7 @@ onMounted(async () => {
               type="number" min="0" class="form-control lux"
             />
           </div>
-          <div class="col-12">
+          <div class="col-md-8">
             <label for="gallery-category" class="form-label-lux">Category</label>
             <input
               id="gallery-category" v-model="form.category" type="text"
@@ -264,8 +398,16 @@ onMounted(async () => {
             />
             <p v-if="fieldErrors.category" class="field-error mt-1">{{ fieldErrors.category }}</p>
           </div>
+          <div class="col-md-4">
+            <label for="gallery-date" class="form-label-lux">Date</label>
+            <input
+              id="gallery-date" v-model="form.photo_date" type="date"
+              class="form-control lux" :class="{ 'border-danger-lux': fieldErrors.photo_date }"
+            />
+            <p v-if="fieldErrors.photo_date" class="field-error mt-1">{{ fieldErrors.photo_date }}</p>
+          </div>
           <div class="col-12">
-            <span class="form-label-lux d-block mb-2">Icon</span>
+            <span class="form-label-lux d-block mb-2">Icon <small class="text-muted">(shown when no photo)</small></span>
             <div class="icon-picker" role="radiogroup" aria-label="Choose an icon">
               <button
                 v-for="icon in iconOptions" :key="icon"
@@ -423,6 +565,93 @@ onMounted(async () => {
   border-radius: 20px;
   padding: 0.15rem 0.5rem;
   z-index: 1;
+}
+
+/* Uploaded photo fills the thumbnail */
+.gallery-admin-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Date line on card */
+.gallery-card-date {
+  font-size: 0.7rem;
+  color: var(--bms-muted);
+  margin-bottom: 0.65rem;
+}
+
+/* ── Photo uploader ──────────────────────────────────────────── */
+.photo-drop {
+  position: relative;
+  border: 1px dashed rgba(201,169,97,0.35);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.25s ease, background 0.25s ease;
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15,15,30,0.5);
+}
+.photo-drop:hover {
+  border-color: rgba(201,169,97,0.7);
+  background: rgba(15,15,30,0.8);
+}
+.photo-drop.has-photo {
+  border-style: solid;
+  padding: 0;
+}
+.photo-drop img {
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  display: block;
+}
+.photo-drop-empty {
+  text-align: center;
+  padding: 1.75rem 1rem;
+  color: var(--bms-muted);
+}
+.photo-drop-empty i {
+  font-size: 2rem;
+  color: rgba(201,169,97,0.6);
+}
+.photo-drop-empty p {
+  margin-top: 0.5rem;
+  color: var(--bms-cream);
+  font-size: 0.85rem;
+}
+.photo-drop-empty small {
+  font-size: 0.72rem;
+}
+.photo-uploading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5,5,14,0.65);
+  color: var(--bms-cream);
+  font-size: 0.85rem;
+}
+.compression-info {
+  color: #a8c85c;
+  font-size: 0.75rem;
+}
+.btn-remove-photo {
+  background: none;
+  border: 1px solid rgba(139,30,63,0.5);
+  border-radius: 6px;
+  color: #e8a0b0;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+.btn-remove-photo:hover {
+  background: rgba(139,30,63,0.25);
 }
 
 /* Skeleton */

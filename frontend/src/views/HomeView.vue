@@ -1,10 +1,25 @@
 <script setup>
+import { computed, onMounted } from 'vue'
 import HeroSection from '../components/HeroSection.vue'
 import SectionTitle from '../components/SectionTitle.vue'
 import CountUp from '../components/CountUp.vue'
 import { useChoirStore } from '../stores/choir'
 
 const choirStore = useChoirStore()
+
+// Live upcoming events from the database (soonest first)
+const upcomingEvents = computed(() =>
+  choirStore.events
+    .filter(e => e.status === 'upcoming')
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+)
+
+// DB stores TIME as HH:MM:SS — display as HH:MM
+const formatTime = (timeStr) => String(timeStr ?? '').slice(0, 5)
+
+onMounted(() => {
+  choirStore.fetchEvents()
+})
 
 const highlights = [
   { icon: 'bi-trophy', title: 'Gold Medalist', text: 'World Choir Games 2024' },
@@ -132,9 +147,31 @@ const handleCardSpotlight = (e) => {
       <div class="container">
         <SectionTitle subtitle="Concerts" title="Upcoming Performances" />
 
-        <div class="row g-4 justify-content-center">
+        <!-- Loading state (live fetch from database) -->
+        <div v-if="choirStore.eventsLoading" class="row g-4 justify-content-center">
+          <div v-for="n in 3" :key="n" class="col-lg-4 col-md-6">
+            <div class="elegant-card p-4 h-100" aria-hidden="true">
+              <p class="text-muted small mb-0">Loading…</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error state -->
+        <div v-else-if="choirStore.eventsError" class="text-center py-4">
+          <p class="text-muted">{{ choirStore.eventsError }}</p>
+          <button class="btn btn-outline-gold mt-2" @click="choirStore.fetchEvents()">
+            Try again
+          </button>
+        </div>
+
+        <!-- Empty state -->
+        <div v-else-if="!upcomingEvents.length" class="text-center py-4">
+          <p class="text-muted">No upcoming performances yet — check back soon.</p>
+        </div>
+
+        <div v-else class="row g-4 justify-content-center">
           <div
-            v-for="(event, index) in choirStore.events.filter(e => e.status === 'upcoming')"
+            v-for="(event, index) in upcomingEvents"
             :key="event.id"
             class="col-lg-4 col-md-6"
             v-reveal="{ delay: index * 150 }"
@@ -154,7 +191,7 @@ const handleCardSpotlight = (e) => {
               <p class="small mb-3" style="line-height: 1.7;">{{ event.description }}</p>
               <div class="small mb-3 text-muted">
                 <div class="mb-1"><i class="bi bi-geo-alt text-gold me-2"></i>{{ event.venue }}</div>
-                <div><i class="bi bi-clock text-gold me-2"></i>{{ event.time }} WIB</div>
+                <div><i class="bi bi-clock text-gold me-2"></i>{{ formatTime(event.time) }} WIB</div>
               </div>
               <RouterLink to="/events" class="text-gold text-decoration-none small">
                 Details <i class="bi bi-arrow-right ms-1"></i>

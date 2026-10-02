@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useAuthStore } from './auth'
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
+
 /**
  * Admin store — CRUD wrapper around the backend content APIs.
  * All endpoints require an admin JWT (handled by auth.apiFetch).
@@ -140,6 +142,31 @@ export const useAdminStore = defineStore('admin', () => {
     galleryItems.value = galleryItems.value.filter(g => g.id !== id)
   }
 
+  /**
+   * Upload a (pre-compressed) image file for the gallery.
+   * Uses multipart/form-data — the backend compresses again before storing.
+   * @returns {{ path: string, bytes: number, width: number, height: number }}
+   */
+  async function uploadGalleryImage(blob, filename = 'photo') {
+    const auth = useAuthStore()
+    const fd = new FormData()
+    fd.append('image', blob, filename)
+
+    const res = await fetch(`${String(API_BASE).replace(/\/+$/, '')}/api/v1/gallery/upload`, {
+      method: 'POST',
+      headers: auth.token ? { Authorization: `Bearer ${auth.token}` } : {},
+      body: fd,
+    })
+    const data = await res.json().catch(() => ({}))
+
+    if (!res.ok) {
+      const err = new Error(data.message || 'Image upload failed.')
+      err.errors = data.errors || {}
+      throw err
+    }
+    return data.data.file
+  }
+
   return {
     members,
     events,
@@ -159,5 +186,6 @@ export const useAdminStore = defineStore('admin', () => {
     createGalleryItem,
     updateGalleryItem,
     deleteGalleryItem,
+    uploadGalleryImage,
   }
 })

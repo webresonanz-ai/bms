@@ -153,6 +153,15 @@ onUnmounted(() => {
           <span>Gallery</span>
           <span class="admin-nav-arrow"><i class="bi bi-chevron-right"></i></span>
         </RouterLink>
+        <RouterLink
+          class="admin-nav-link"
+          to="/admin/settings"
+          @click="closeSidebar"
+        >
+          <span class="admin-nav-icon"><i class="bi bi-globe"></i></span>
+          <span>Website</span>
+          <span class="admin-nav-arrow"><i class="bi bi-chevron-right"></i></span>
+        </RouterLink>
       </nav>
 
       <!-- Footer links -->

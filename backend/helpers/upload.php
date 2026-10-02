@@ -10,13 +10,78 @@
  *   3. Random filenames to avoid collisions.
  */
 
-// Max dimension (px) of the stored image — longest side.
+// Max dimension (px) of stored gallery images — longest side.
 if (!defined('GALLERY_MAX_DIM')) {
     define('GALLERY_MAX_DIM', (int) env('GALLERY_MAX_DIM', 1600));
 }
 // Max accepted upload size: 15 MB (pre-compression).
 if (!defined('GALLERY_MAX_UPLOAD_BYTES')) {
     define('GALLERY_MAX_UPLOAD_BYTES', 15 * 1024 * 1024);
+}
+
+/**
+ * Store an uploaded image AS-IS (no compression, original quality).
+ * Used for the hero background — only gallery photos are compressed.
+ *
+ * @param  array  $file    One entry of $_FILES (must contain tmp_name, size, error, name).
+ * @param  string $subdir  Subdirectory of uploads/ (letters, numbers, -, _ only).
+ * @return array           ['path' => 'uploads/<subdir>/xxx.jpg', 'bytes' => int, 'width' => int, 'height' => int]
+ *
+ * @throws RuntimeException  When the file is invalid.
+ */
+function saveOriginalImage(array $file, string $subdir = 'settings'): array
+{
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        throw new RuntimeException('No image was uploaded.');
+    }
+
+    if (($file['size'] ?? 0) > GALLERY_MAX_UPLOAD_BYTES) {
+        throw new RuntimeException('Image is too large. Maximum 15 MB.');
+    }
+
+    $tmp = $file['tmp_name'] ?? '';
+    if (!is_uploaded_file($tmp)) {
+        throw new RuntimeException('Invalid upload.');
+    }
+
+    $info = @getimagesize($tmp);
+    if ($info === false) {
+        throw new RuntimeException('File is not a valid image.');
+    }
+
+    $ext = match ($info['mime'] ?? '') {
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/gif'  => 'gif',
+        'image/webp' => 'webp',
+        default      => null,
+    };
+    if ($ext === null) {
+        throw new RuntimeException('Only JPG, PNG, GIF and WebP images are allowed.');
+    }
+
+    if (!preg_match('/^[A-Za-z0-9_-]+$/', $subdir)) {
+        throw new RuntimeException('Invalid upload target.');
+    }
+    $dir = __DIR__ . '/../uploads/' . $subdir;
+    if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
+        throw new RuntimeException('Could not create upload directory.');
+    }
+
+    $name = bin2hex(random_bytes(16)) . '.' . $ext;
+    $dest = $dir . '/' . $name;
+
+    // move_uploaded_file is atomic and keeps the original bytes untouched
+    if (!move_uploaded_file($tmp, $dest)) {
+        throw new RuntimeException('Could not store image.');
+    }
+
+    return [
+        'path'   => 'backend/uploads/' . $subdir . '/' . $name,
+        'bytes'  => filesize($dest) ?: 0,
+        'width'  => (int) ($info[0] ?? 0),
+        'height' => (int) ($info[1] ?? 0),
+    ];
 }
 
 /**
@@ -28,6 +93,26 @@ if (!defined('GALLERY_MAX_UPLOAD_BYTES')) {
  * @throws RuntimeException  When the file is invalid or cannot be processed.
  */
 function saveCompressedGalleryImage(array $file): array
+{
+    return saveCompressedImage($file, 'gallery', GALLERY_MAX_DIM);
+}
+
+/**
+ * Validate, compress and store any uploaded image under uploads/<$subdir>/.
+ *
+ * Strategy to reduce storage usage:
+ *   1. Downscale so the longest side is at most $maxDim px.
+ *   2. Re-encode as WebP (quality 80) when supported, otherwise JPEG (quality 82).
+ *   3. Random filenames to avoid collisions.
+ *
+ * @param  array  $file    One entry of $_FILES (must contain tmp_name, size, error).
+ * @param  string $subdir  Subdirectory of uploads/ (letters, numbers, -, _ only).
+ * @param  int    $maxDim  Longest side (px) of the stored image.
+ * @return array           ['path' => 'uploads/<subdir>/xxx.webp', 'bytes' => int, 'width' => int, 'height' => int]
+ *
+ * @throws RuntimeException  When the file is invalid or cannot be processed.
+ */
+function saveCompressedImage(array $file, string $subdir = 'gallery', int $maxDim = 1600): array
 {
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
         throw new RuntimeException('No image was uploaded.');
@@ -66,8 +151,8 @@ function saveCompressedGalleryImage(array $file): array
 
     // Downscale if the longest side exceeds the limit
     $longest = max($width, $height);
-    if ($longest > GALLERY_MAX_DIM) {
-        $scale     = GALLERY_MAX_DIM / $longest;
+    if ($longest > $maxDim) {
+        $scale     = $maxDim / $longest;
         $newWidth  = (int) round($width * $scale);
         $newHeight = (int) round($height * $scale);
         $resized   = imagecreatetruecolor($newWidth, $newHeight);
@@ -83,8 +168,11 @@ function saveCompressedGalleryImage(array $file): array
         $height = $newHeight;
     }
 
-    // Destination directory: <backend>/uploads/gallery
-    $dir = __DIR__ . '/../uploads/gallery';
+    // Destination directory: <backend>/uploads/<subdir>
+    if (!preg_match('/^[A-Za-z0-9_-]+$/', $subdir)) {
+        throw new RuntimeException('Invalid upload target.');
+    }
+    $dir = __DIR__ . '/../uploads/' . $subdir;
     if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
         throw new RuntimeException('Could not create upload directory.');
     }
@@ -112,7 +200,7 @@ function saveCompressedGalleryImage(array $file): array
     }
 
     return [
-        'path'   => 'backend/uploads/gallery/' . $name,
+        'path'   => 'backend/uploads/' . $subdir . '/' . $name,
         'bytes'  => filesize($dest) ?: 0,
         'width'  => $width,
         'height' => $height,
@@ -125,15 +213,24 @@ function saveCompressedGalleryImage(array $file): array
  */
 function deleteGalleryFile(?string $imageUrl): void
 {
-    if ($imageUrl === null || $imageUrl === '') {
+    deleteUploadFile($imageUrl);
+}
+
+/**
+ * Delete a previously uploaded file given its stored relative path.
+ * Remote URLs (http…), paths outside uploads/ and missing files are ignored.
+ */
+function deleteUploadFile(?string $path): void
+{
+    if ($path === null || $path === '') {
         return;
     }
-    if (str_starts_with($imageUrl, 'http://') || str_starts_with($imageUrl, 'https://')) {
+    if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
         return;
     }
 
-    $path = __DIR__ . '/../' . ltrim($imageUrl, '/');
-    $real = realpath($path);
+    $full = __DIR__ . '/../' . ltrim($path, '/');
+    $real = realpath($full);
     $base = realpath(__DIR__ . '/../uploads');
 
     // Only delete files that really live inside uploads/ (path traversal guard)

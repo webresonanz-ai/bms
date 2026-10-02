@@ -148,11 +148,19 @@ export const useAdminStore = defineStore('admin', () => {
    * @returns {{ path: string, bytes: number, width: number, height: number }}
    */
   async function uploadGalleryImage(blob, filename = 'photo') {
+    return uploadFile('/api/v1/gallery/upload', blob, filename)
+  }
+
+  /**
+   * Generic compressed-image upload to any upload endpoint.
+   * @returns {{ path: string, bytes: number, width: number, height: number }}
+   */
+  async function uploadFile(endpoint, blob, filename = 'photo') {
     const auth = useAuthStore()
     const fd = new FormData()
     fd.append('image', blob, filename)
 
-    const res = await fetch(`${String(API_BASE).replace(/\/+$/, '')}/api/v1/gallery/upload`, {
+    const res = await fetch(`${String(API_BASE).replace(/\/+$/, '')}${endpoint}`, {
       method: 'POST',
       headers: auth.token ? { Authorization: `Bearer ${auth.token}` } : {},
       body: fd,
@@ -165,6 +173,18 @@ export const useAdminStore = defineStore('admin', () => {
       throw err
     }
     return data.data.file
+  }
+
+  /**
+   * Persist site settings (e.g. { hero_background: 'uploads/settings/…' }).
+   * @returns the full settings object.
+   */
+  async function saveSettings(settings) {
+    const data = await useAuthStore().apiFetch('/api/v1/settings', {
+      method: 'PUT',
+      body: JSON.stringify({ settings }),
+    })
+    return data.data.settings
   }
 
   return {
@@ -187,5 +207,7 @@ export const useAdminStore = defineStore('admin', () => {
     updateGalleryItem,
     deleteGalleryItem,
     uploadGalleryImage,
+    uploadFile,
+    saveSettings,
   }
 })

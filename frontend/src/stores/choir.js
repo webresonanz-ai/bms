@@ -48,6 +48,24 @@ export const useChoirStore = defineStore('choir', () => {
     }
   }
 
+  // ── Site settings (live from database, public endpoint) ─────────
+  const settings = ref({})
+  const settingsLoading = ref(false)
+
+  async function fetchSettings() {
+    if (settingsLoading.value) return
+    settingsLoading.value = true
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/settings`)
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Failed to load settings.')
+      settings.value = data.data?.settings ?? {}
+    } catch {
+      settings.value = {}
+    } finally {
+      settingsLoading.value = false
+    }
+  }
   // ── Gallery (live from database, public endpoint) ─────────────────
   const galleryItems = ref([])
   const galleryLoading = ref(false)
@@ -84,6 +102,7 @@ export const useChoirStore = defineStore('choir', () => {
     members, membersLoading, membersError, fetchMembers,
     events, eventsLoading, eventsError, fetchEvents,
     galleryItems, galleryLoading, galleryError, fetchGallery,
+    settings, settingsLoading, fetchSettings,
     milestones,
   }
 })

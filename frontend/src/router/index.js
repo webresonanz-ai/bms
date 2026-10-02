@@ -61,6 +61,11 @@ const router = createRouter({
           name: 'admin-gallery',
           component: () => import('../views/admin/AdminGallery.vue'),
         },
+        {
+          path: 'settings',
+          name: 'admin-settings',
+          component: () => import('../views/admin/AdminSettings.vue'),
+        },
       ],
     },
     // ── Auth routes ────────────────────────────────────────────────

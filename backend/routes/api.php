@@ -10,6 +10,7 @@ require_once __DIR__ . '/../controllers/AuthController.php';
 require_once __DIR__ . '/../controllers/MemberController.php';
 require_once __DIR__ . '/../controllers/EventController.php';
 require_once __DIR__ . '/../controllers/GalleryController.php';
+require_once __DIR__ . '/../controllers/SettingsController.php';
 require_once __DIR__ . '/../helpers/response.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -36,6 +37,11 @@ $static = [
     'GET /api/v1/gallery'        => [GalleryController::class,'index'],
     'POST /api/v1/gallery'       => [GalleryController::class,'store'],
     'POST /api/v1/gallery/upload' => [GalleryController::class,'upload'],
+
+    // Site settings
+    'GET /api/v1/settings'        => [SettingsController::class,'index'],
+    'PUT /api/v1/settings'        => [SettingsController::class,'update'],
+    'POST /api/v1/settings/upload' => [SettingsController::class,'upload'],
 ];
 
 $key = "$method $uri";

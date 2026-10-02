@@ -1,5 +1,12 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useChoirStore } from '../stores/choir'
+import { resolveUploadSrc } from '../utils/imageCompress'
+
+const choirStore = useChoirStore()
+
+// Custom hero background uploaded from Admin → Website (NULL = gradient only)
+const heroBg = computed(() => resolveUploadSrc(choirStore.settings?.hero_background))
 
 const parallaxStyle = ref({})
 let rafId = null
@@ -17,6 +24,7 @@ const handleScroll = () => {
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
+  choirStore.fetchSettings()
 })
 
 onUnmounted(() => {
@@ -26,12 +34,18 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="hero-section">
+  <section class="hero-section" :class="{ 'has-custom-bg': heroBg }">
     <div
       class="hero-parallax"
       :style="parallaxStyle"
       aria-hidden="true"
     >
+      <div
+        v-if="heroBg"
+        class="hero-bg-photo"
+        :style="{ backgroundImage: `url('${heroBg}')` }"
+      ></div>
+      <div v-if="heroBg" class="hero-bg-overlay"></div>
       <div class="orb orb-1"></div>
       <div class="orb orb-2"></div>
     </div>
@@ -83,3 +97,28 @@ onUnmounted(() => {
     </a>
   </section>
 </template>
+
+<style scoped>
+/* Custom background photo (uploaded from Admin → Website) */
+.hero-bg-photo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  animation: heroBgIn 2.5s ease forwards;
+}
+
+/* Dark overlay so the title stays readable over any photo */
+.hero-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(10, 10, 22, 0.62) 0%, rgba(10, 10, 22, 0.45) 45%, rgba(15, 15, 30, 0.88) 100%),
+    radial-gradient(circle at 50% 40%, transparent 30%, rgba(10, 10, 22, 0.5) 100%);
+}
+
+@keyframes heroBgIn {
+  from { opacity: 0; transform: scale(1.04); }
+  to   { opacity: 1; transform: scale(1); }
+}
+</style>

@@ -98,7 +98,7 @@ export async function compressImage(
   if (typeof bitmap.close === 'function') bitmap.close()
 
   // Try WebP first (smallest), fall back to JPEG
-  let blob = null
+  let blob
   let mime = 'image/webp'
   try {
     blob = await canvasToBlob(canvas, 'image/webp', quality)
